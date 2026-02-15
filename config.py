@@ -114,3 +114,13 @@ YOUTUBE_SEARCH_QUERIES = [
 
 # Scheduler
 SCAN_INTERVAL_HOURS = 2
+
+# Email notifications (set all to enable)
+SMTP_HOST = None
+SMTP_PORT = 587
+SMTP_USER = None
+SMTP_PASS = None
+NOTIFY_EMAIL = None  # recipient for alerts
+
+# Webhook notifications (Slack/Discord)
+WEBHOOK_URL = None

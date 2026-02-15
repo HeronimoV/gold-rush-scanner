@@ -93,6 +93,12 @@ def process_post(post_data, subreddit):
         inserted = insert_lead("reddit", author, text[:2000], url, subreddit, score, ts)
         if inserted:
             log.info(f"Lead: u/{author} (score={score}) — {', '.join(k for k,_ in matches)}")
+            if score >= 8:
+                try:
+                    from notifications import notify_high_intent_lead
+                    notify_high_intent_lead(author, subreddit, score, text[:500], url)
+                except Exception as e:
+                    log.warning(f"Notification failed: {e}")
             return 1
     return 0
 
@@ -113,6 +119,12 @@ def process_comment(comment_data, subreddit):
         inserted = insert_lead("reddit", author, body[:2000], url, subreddit, score, ts)
         if inserted:
             log.info(f"Lead: u/{author} (score={score}) — {', '.join(k for k,_ in matches)}")
+            if score >= 8:
+                try:
+                    from notifications import notify_high_intent_lead
+                    notify_high_intent_lead(author, subreddit, score, body[:500], url)
+                except Exception as e:
+                    log.warning(f"Notification failed: {e}")
             return 1
     return 0
 

@@ -14,6 +14,8 @@ from db import (
     update_notes, insert_form_lead, get_form_leads,
     update_form_lead_notes, mark_form_lead_contacted,
 )
+from templates import generate_reply
+from reports import generate_weekly_report
 
 app = Flask(__name__)
 
@@ -82,6 +84,13 @@ TEMPLATE = """<!DOCTYPE html>
   .btn-sm:hover { background: #2a2d37; }
   .contacted { color: #2a5; } .not-contacted { color: #888; }
   .empty { text-align: center; padding: 60px; color: #666; font-size: 16px; }
+  .modal-overlay { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:1000; justify-content:center; align-items:center; }
+  .modal-overlay.show { display:flex; }
+  .modal { background:#1a1d27; border:1px solid #b8860b; border-radius:8px; padding:24px; max-width:600px; width:90%; max-height:80vh; overflow-y:auto; }
+  .modal h3 { color:#daa520; margin-bottom:12px; }
+  .modal textarea { width:100%; min-height:200px; background:#252830; color:#e0e0e0; border:1px solid #3a3d47; border-radius:4px; padding:10px; font-size:13px; font-family:inherit; resize:vertical; }
+  .modal .btn-copy { background:#2a5; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; font-weight:600; margin-top:8px; }
+  .modal .btn-close { background:#555; color:#fff; border:none; padding:8px 16px; border-radius:4px; cursor:pointer; margin-top:8px; margin-left:8px; }
   .notes-input { background: #252830; border: 1px solid #3a3d47; color: #e0e0e0; padding: 4px 6px; border-radius: 3px; font-size: 12px; width: 140px; }
   .notes-save { padding: 2px 8px; font-size: 11px; background: #b8860b; border: none; color: #000; border-radius: 3px; cursor: pointer; margin-left: 4px; }
   @media (max-width: 768px) {
@@ -109,6 +118,7 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="stat-box"><span class="num">r/{{ stats.top_subreddit }}</span>Top Source</div>
     <div class="stat-box"><span class="num">{{ stats.high_intent }}</span>High Intent</div>
     <div class="stat-box"><span class="num">{{ stats.form_leads }}</span>Form Leads</div>
+    <div class="stat-box"><a href="/report" style="color:#000;text-decoration:none;font-weight:700">📊 Report</a></div>
     <div class="stat-box" style="margin-left:auto">
       {% if scan_status.running %}
         <span class="num">⏳</span>Scanning...
@@ -169,7 +179,10 @@ TEMPLATE = """<!DOCTYPE html>
     </form>
   </td>
   <td>{% if l.contacted %}<span class="contacted">✅</span>{% else %}<span class="not-contacted">—</span>{% endif %}</td>
-  <td><form method="post" action="/toggle/{{ l.id }}" style="display:inline"><button class="btn-sm">{{ '↩' if l.contacted else '✓' }}</button></form></td>
+  <td>
+    <form method="post" action="/toggle/{{ l.id }}" style="display:inline"><button class="btn-sm">{{ '↩' if l.contacted else '✓' }}</button></form>
+    <button class="btn-sm" onclick="draftReply({{ l.id }}, '{{ l.username }}', '{{ l.subreddit }}', {{ l.intent_score }})" title="Draft Reply">📝</button>
+  </td>
 </tr>
 {% endfor %}
 </tbody>
@@ -213,6 +226,17 @@ TEMPLATE = """<!DOCTYPE html>
 </div>
 </div>
 
+<div class="modal-overlay" id="replyModal">
+  <div class="modal">
+    <h3>📝 Draft Reply for <span id="replyUser"></span></h3>
+    <textarea id="replyText" readonly></textarea>
+    <div>
+      <button class="btn-copy" onclick="copyReply()">📋 Copy to Clipboard</button>
+      <button class="btn-close" onclick="closeReplyModal()">Close</button>
+    </div>
+  </div>
+</div>
+
 <script>
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -220,6 +244,34 @@ function switchTab(name) {
   event.target.classList.add('active');
   document.getElementById('tab-' + name).classList.add('active');
 }
+
+function draftReply(leadId, username, subreddit, score) {
+  fetch('/api/draft-reply', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({lead_id: leadId, username: username, subreddit: subreddit, score: score})
+  })
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById('replyUser').textContent = 'u/' + username;
+    document.getElementById('replyText').value = data.reply;
+    document.getElementById('replyModal').classList.add('show');
+  });
+}
+
+function closeReplyModal() {
+  document.getElementById('replyModal').classList.remove('show');
+}
+
+function copyReply() {
+  const ta = document.getElementById('replyText');
+  ta.select();
+  navigator.clipboard.writeText(ta.value);
+}
+
+document.getElementById('replyModal').addEventListener('click', function(e) {
+  if (e.target === this) closeReplyModal();
+});
 </script>
 </body></html>"""
 
@@ -288,7 +340,42 @@ def submit_lead():
         return jsonify({"error": "Name and email are required"}), 400
 
     insert_form_lead(name, email, phone, interest, budget, referral)
+
+    # Send notification
+    try:
+        from notifications import notify_form_submission
+        notify_form_submission(name, email, phone, interest, budget, referral)
+    except Exception:
+        pass
+
     return jsonify({"success": True, "message": "Thank you! We'll be in touch shortly."})
+
+
+@app.route("/api/draft-reply", methods=["POST"])
+def draft_reply():
+    """Generate a draft reply for a lead."""
+    data = request.get_json()
+    lead_id = data.get("lead_id")
+    username = data.get("username", "")
+    subreddit = data.get("subreddit", "")
+    score = data.get("score", 5)
+
+    # Get the lead content from DB
+    from db import get_connection
+    conn = get_connection()
+    row = conn.execute("SELECT content FROM leads WHERE id = ?", (lead_id,)).fetchone()
+    conn.close()
+    content = row["content"] if row else ""
+
+    reply = generate_reply(username, content, subreddit, score)
+    return jsonify({"reply": reply})
+
+
+@app.route("/report")
+def weekly_report():
+    """Show the weekly report."""
+    report = generate_weekly_report()
+    return report["html"]
 
 
 @app.route("/landing")
