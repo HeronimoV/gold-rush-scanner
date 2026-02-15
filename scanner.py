@@ -207,6 +207,24 @@ def run_full_scan():
     except Exception as e:
         log.warning(f"YouTube scan skipped: {e}")
 
+    # Web forum scan
+    try:
+        from web_scanner import run_web_scan
+        import os
+        brave_key = os.environ.get("BRAVE_API_KEY")
+        web_total = run_web_scan(brave_key)
+        total += web_total
+    except Exception as e:
+        log.warning(f"Web scan skipped: {e}")
+
+    # Competitor complaint scan
+    try:
+        from competitors import run_competitor_scan
+        comp_total = run_competitor_scan()
+        total += comp_total
+    except Exception as e:
+        log.warning(f"Competitor scan skipped: {e}")
+
     log.info(f"Scan complete! {total} new leads found.")
     return total
 

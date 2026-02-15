@@ -142,7 +142,7 @@ def mark_form_lead_contacted(lead_id):
     conn.close()
 
 
-def get_leads(min_score=None, subreddit=None, date_from=None, contacted=None, limit=500):
+def get_leads(min_score=None, subreddit=None, date_from=None, contacted=None, platform=None, limit=500):
     """Fetch leads with optional filters."""
     conn = get_connection()
     query = "SELECT * FROM leads WHERE 1=1"
@@ -160,6 +160,9 @@ def get_leads(min_score=None, subreddit=None, date_from=None, contacted=None, li
     if contacted is not None:
         query += " AND contacted = ?"
         params.append(int(contacted))
+    if platform:
+        query += " AND platform = ?"
+        params.append(platform)
 
     query += " ORDER BY intent_score DESC, found_at DESC LIMIT ?"
     params.append(limit)
@@ -167,6 +170,14 @@ def get_leads(min_score=None, subreddit=None, date_from=None, contacted=None, li
     rows = conn.execute(query, params).fetchall()
     conn.close()
     return [dict(r) for r in rows]
+
+
+def get_platforms():
+    """Get list of distinct platforms in the database."""
+    conn = get_connection()
+    rows = conn.execute("SELECT DISTINCT platform FROM leads ORDER BY platform").fetchall()
+    conn.close()
+    return [r["platform"] for r in rows]
 
 
 def mark_contacted(lead_id):
@@ -291,6 +302,124 @@ def is_lead_queued(lead_id):
     row = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE lead_id = ?", (lead_id,)).fetchone()
     conn.close()
     return row["c"] > 0
+
+
+# --- Analytics queries ---
+
+def leads_by_day(days=30):
+    """Leads per day for the last N days."""
+    conn = get_connection()
+    cutoff = (datetime.now(timezone.utc) - timedelta(days=days)).strftime("%Y-%m-%d")
+    rows = conn.execute(
+        "SELECT DATE(found_at) as day, COUNT(*) as count FROM leads WHERE found_at >= ? GROUP BY day ORDER BY day",
+        (cutoff,),
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def leads_by_subreddit():
+    """Lead count per subreddit."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT subreddit, COUNT(*) as count FROM leads GROUP BY subreddit ORDER BY count DESC LIMIT 20"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def leads_score_distribution():
+    """Count of leads at each score level 1-10."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT intent_score as score, COUNT(*) as count FROM leads GROUP BY intent_score ORDER BY intent_score"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def leads_by_platform():
+    """Lead count per platform."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT platform, COUNT(*) as count FROM leads GROUP BY platform ORDER BY count DESC"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def leads_by_hour():
+    """Lead count by hour of day (0-23)."""
+    conn = get_connection()
+    rows = conn.execute(
+        "SELECT CAST(strftime('%H', found_at) AS INTEGER) as hour, COUNT(*) as count FROM leads GROUP BY hour ORDER BY hour"
+    ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def leads_by_keyword():
+    """Top keywords by lead count (checks content against config keywords)."""
+    from config import KEYWORDS
+    conn = get_connection()
+    all_content = conn.execute("SELECT content FROM leads").fetchall()
+    conn.close()
+    counts = {}
+    for row in all_content:
+        c = row["content"].lower()
+        for kw in KEYWORDS:
+            if kw in c:
+                counts[kw] = counts.get(kw, 0) + 1
+    sorted_kw = sorted(counts.items(), key=lambda x: -x[1])[:15]
+    return [{"keyword": k, "count": v} for k, v in sorted_kw]
+
+
+def get_analytics_stats():
+    """Extended stats for analytics page."""
+    conn = get_connection()
+    total = conn.execute("SELECT COUNT(*) as c FROM leads").fetchone()["c"]
+
+    now = datetime.now(timezone.utc)
+    week_start = (now - timedelta(days=now.weekday())).strftime("%Y-%m-%d")
+    last_week_start = (now - timedelta(days=now.weekday() + 7)).strftime("%Y-%m-%d")
+
+    this_week = conn.execute("SELECT COUNT(*) as c FROM leads WHERE found_at >= ?", (week_start,)).fetchone()["c"]
+    last_week = conn.execute(
+        "SELECT COUNT(*) as c FROM leads WHERE found_at >= ? AND found_at < ?",
+        (last_week_start, week_start),
+    ).fetchone()["c"]
+
+    avg_row = conn.execute("SELECT AVG(intent_score) as a FROM leads").fetchone()
+    avg_score = round(avg_row["a"], 1) if avg_row["a"] else 0
+
+    high_intent_week = conn.execute(
+        "SELECT COUNT(*) as c FROM leads WHERE intent_score >= 8 AND found_at >= ?", (week_start,)
+    ).fetchone()["c"]
+
+    form_total = conn.execute("SELECT COUNT(*) as c FROM form_leads").fetchone()["c"]
+    form_contacted = conn.execute("SELECT COUNT(*) as c FROM form_leads WHERE contacted = 1").fetchone()["c"]
+    conversion_rate = round(form_contacted / form_total * 100, 1) if form_total > 0 else 0
+
+    # Leads this month for ROI
+    month_start = now.strftime("%Y-%m-01")
+    leads_this_month = conn.execute("SELECT COUNT(*) as c FROM leads WHERE found_at >= ?", (month_start,)).fetchone()["c"]
+
+    conn.close()
+
+    week_change = 0
+    if last_week > 0:
+        week_change = round((this_week - last_week) / last_week * 100, 1)
+
+    return {
+        "total": total,
+        "this_week": this_week,
+        "last_week": last_week,
+        "week_change": week_change,
+        "avg_score": avg_score,
+        "high_intent_week": high_intent_week,
+        "form_conversion_rate": conversion_rate,
+        "leads_this_month": leads_this_month,
+    }
 
 
 # Auto-init on import
