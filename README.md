@@ -1,6 +1,6 @@
-# ⛏️ Gold Rush Scanner
+# 🚀 Lead Rush
 
-Reddit & YouTube lead scanner for gold & silver buying intent. Monitors subreddits and YouTube comments, scores leads by intent, and provides a web dashboard with a lead capture landing page.
+Social media lead generation platform. Monitors Reddit, web forums, and social platforms for buying intent across any industry. Scores leads by intent and provides a web dashboard with lead capture and analytics.
 
 ## Setup
 

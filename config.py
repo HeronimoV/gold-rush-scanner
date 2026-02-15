@@ -126,7 +126,7 @@ NOTIFY_EMAIL = None  # recipient for alerts
 WEBHOOK_URL = None
 
 # White-label config
-COMPANY_NAME = "[Company Name]"
+COMPANY_NAME = "Lead Rush"
 COMPANY_LOGO_URL = None
 BRAND_COLOR = "#daa520"
 
