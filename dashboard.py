@@ -41,12 +41,16 @@ def _run_scan_bg():
         _scan_status["running"] = False
 
 def _auto_scan_loop():
-    """Auto-scan every 2 hours."""
+    """Auto-scan on startup then every 2 hours."""
+    _time.sleep(5)  # brief startup delay
+    # Run immediately on startup to populate fresh DB
+    if not _scan_status["running"]:
+        print("🚀 Running initial scan on startup...")
+        _run_scan_bg()
     while True:
-        _time.sleep(10)  # initial delay
+        _time.sleep(7200)  # 2 hours
         if not _scan_status["running"]:
             _run_scan_bg()
-        _time.sleep(7190)  # ~2 hours
 
 # Start auto-scan thread
 _auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
