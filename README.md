@@ -1,4 +1,4 @@
-# 🚀 Lead Rush
+# 🎯 Social Prospector
 
 Social media lead generation platform. Monitors Reddit, web forums, and social platforms for buying intent across any industry. Scores leads by intent and provides a web dashboard with lead capture and analytics.
 

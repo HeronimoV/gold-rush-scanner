@@ -64,7 +64,7 @@ TEMPLATE = """<!DOCTYPE html>
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Lead Rush — Dashboard</title>
+<title>Social Prospector — Dashboard</title>
 <style>
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0f1117; color: #e0e0e0; }
@@ -123,7 +123,7 @@ TEMPLATE = """<!DOCTYPE html>
 </head>
 <body>
 <div class="header">
-  <h1>⛏️ {{ company_name if company_name != '[Company Name]' else 'Lead Rush' }}</h1>
+  <h1>🎯 {{ company_name if company_name != '[Company Name]' else 'Social Prospector' }}</h1>
   <div class="quick-stats">
     <div class="stat-box"><span class="num">{{ stats.total }}</span>Total Leads</div>
     <div class="stat-box"><span class="num">{{ stats.today }}</span>Today</div>
@@ -861,7 +861,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
 </div>
 
 <div class="page cover">
-  <h1>Lead Rush Platform</h1>
+  <h1>Social Prospector Platform</h1>
   <div class="sub">AI-Powered Precious Metals Buyer Discovery</div>
   <div class="company">Presentation for {{ company_name }}</div>
 </div>
