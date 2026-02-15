@@ -1071,6 +1071,13 @@ def pitch():
     )
 
 
+@app.route("/contracts")
+@app.route("/contracts/<path:filename>")
+def contracts(filename="index.html"):
+    contracts_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "contracts")
+    return send_from_directory(contracts_dir, filename)
+
+
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
     debug = os.environ.get("FLASK_ENV") == "development"
