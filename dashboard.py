@@ -935,10 +935,69 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   </table>
 
   <h2>Pricing</h2>
-  <div class="placeholder">[PRICING] — Customize pricing tiers here</div>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:20px 0">
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #888;border-radius:12px;padding:24px;text-align:center;background:#1a1a1a">
+      <div style="font-size:14px;color:#888;text-transform:uppercase;letter-spacing:2px">🥉 Silver</div>
+      <div style="font-size:42px;font-weight:800;color:#c0c0c0;margin:12px 0">$897<span style="font-size:16px;color:#888">/mo</span></div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Reddit monitoring (8 subreddits)</li>
+        <li>✅ Up to 200 leads/month</li>
+        <li>✅ Intent scoring & deduplication</li>
+        <li>✅ Dashboard access</li>
+        <li>✅ CSV export</li>
+        <li>✅ Email notifications</li>
+        <li>❌ Web forum scanning</li>
+        <li>❌ Competitor monitoring</li>
+        <li>❌ Reply automation</li>
+      </ul>
+      <div style="margin-top:16px;font-size:12px;color:#666">For dealers getting started with digital leads</div>
+    </div>
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;background:#1a1200;position:relative">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#daa520;color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MOST POPULAR</div>
+      <div style="font-size:14px;color:#daa520;text-transform:uppercase;letter-spacing:2px">🥇 Gold</div>
+      <div style="font-size:42px;font-weight:800;color:#daa520;margin:12px 0">$1,747<span style="font-size:16px;color:#888">/mo</span></div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Reddit + Web forum monitoring</li>
+        <li>✅ Unlimited leads</li>
+        <li>✅ Competitor complaint detection</li>
+        <li>✅ Reply queue with AI templates</li>
+        <li>✅ Branded landing page</li>
+        <li>✅ Analytics dashboard</li>
+        <li>✅ Weekly performance reports</li>
+        <li>✅ Priority support</li>
+        <li>❌ X/Twitter & YouTube</li>
+      </ul>
+      <div style="margin-top:16px;font-size:12px;color:#b8860b">For serious dealers ready to dominate lead gen</div>
+    </div>
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f">
+      <div style="font-size:14px;color:#b9f2ff;text-transform:uppercase;letter-spacing:2px">💎 Platinum</div>
+      <div style="font-size:42px;font-weight:800;color:#b9f2ff;margin:12px 0">$3,497<span style="font-size:16px;color:#888">/mo</span></div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Everything in Gold</li>
+        <li>✅ X/Twitter monitoring</li>
+        <li>✅ YouTube comment scanning</li>
+        <li>✅ AI-powered intent analysis</li>
+        <li>✅ Custom branded materials</li>
+        <li>✅ Monthly strategy call</li>
+        <li>✅ Dedicated account manager</li>
+        <li>✅ API access</li>
+        <li>✅ White-label option</li>
+      </ul>
+      <div style="margin-top:16px;font-size:12px;color:#7ac8db">For top dealers who want every advantage</div>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include a $500 one-time setup fee · Annual billing saves 2 months · $1 first-week trial available</p>
 
   <h2>Next Steps</h2>
-  <div class="placeholder">[NEXT STEPS] — Customize your call-to-action here</div>
+  <div style="background:#1a1200;border:1px solid #b8860b;border-radius:8px;padding:24px;text-align:center">
+    <p style="font-size:18px;color:#daa520;font-weight:700;margin-bottom:12px">Ready to turn social media conversations into customers?</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px">1. Choose your plan</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px">2. We configure and brand the platform for your business (24-48 hours)</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px">3. Leads start flowing immediately</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:16px">4. Your sales team closes deals while we handle the pipeline</p>
+    <p style="font-size:20px;color:#daa520;font-weight:800">📞 Schedule a demo call today</p>
+    <p style="font-size:13px;color:#888;margin-top:8px">Contact us to see live results with real data from your market</p>
+  </div>
 </div>
 </body></html>"""
 
