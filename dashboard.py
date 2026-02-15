@@ -988,13 +988,63 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   </div>
   <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include a $500 one-time setup fee · Annual billing saves 2 months · $1 first-week trial available</p>
 
+  <h2 style="margin-top:40px">Enterprise Licensing — Own It Outright</h2>
+  <p style="text-align:center;color:#999;margin-bottom:20px;font-size:14px">Want full ownership instead of a monthly subscription? We'll build it, brand it, deploy it, and hand you the keys.</p>
+  <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:20px 0">
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #cd7f32;border-radius:12px;padding:24px;text-align:center;background:#1a1208">
+      <div style="font-size:14px;color:#cd7f32;text-transform:uppercase;letter-spacing:2px">🏢 Enterprise</div>
+      <div style="font-size:38px;font-weight:800;color:#cd7f32;margin:12px 0">$25,000</div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px">One-time payment</div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Full source code ownership</li>
+        <li>✅ Branded & configured for your business</li>
+        <li>✅ Deployed on your infrastructure</li>
+        <li>✅ 90 days tech support</li>
+        <li>✅ Team training session</li>
+        <li>✅ All current features</li>
+        <li>❌ Custom feature development</li>
+        <li>❌ Resale rights</li>
+      </ul>
+    </div>
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;background:#1a1200;position:relative">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#daa520;color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">BEST VALUE</div>
+      <div style="font-size:14px;color:#daa520;text-transform:uppercase;letter-spacing:2px">🏢 Enterprise+</div>
+      <div style="font-size:38px;font-weight:800;color:#daa520;margin:12px 0">$45,000</div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px">One-time payment</div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Everything in Enterprise</li>
+        <li>✅ Custom features built to spec</li>
+        <li>✅ 12 months tech support</li>
+        <li>✅ Priority feature requests</li>
+        <li>✅ Quarterly strategy calls</li>
+        <li>✅ White-label rights</li>
+        <li>❌ Multi-industry resale</li>
+      </ul>
+    </div>
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #e5e4e2;border-radius:12px;padding:24px;text-align:center;background:#141418;position:relative">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#daa520,#e5e4e2,#daa520);color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">UNLIMITED</div>
+      <div style="font-size:14px;color:#e5e4e2;text-transform:uppercase;letter-spacing:2px">🏢 Franchise</div>
+      <div style="font-size:38px;font-weight:800;color:#e5e4e2;margin:12px 0">$75,000</div>
+      <div style="font-size:13px;color:#888;margin-bottom:12px">One-time payment</div>
+      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
+        <li>✅ Everything in Enterprise+</li>
+        <li>✅ Resell to ANY industry</li>
+        <li>✅ Custom keyword packs per niche</li>
+        <li>✅ Lifetime tech support</li>
+        <li>✅ Keep 100% of client revenue</li>
+        <li>✅ Real estate, auto, watches, crypto</li>
+        <li>✅ Unlimited deployments</li>
+      </ul>
+    </div>
+  </div>
+  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">Enterprise licenses include full source code, documentation, and deployment assistance · Payment plans available</p>
+
   <h2>Next Steps</h2>
   <div style="background:#1a1200;border:1px solid #b8860b;border-radius:8px;padding:24px;text-align:center">
     <p style="font-size:18px;color:#daa520;font-weight:700;margin-bottom:12px">Ready to turn social media conversations into customers?</p>
-    <p style="font-size:14px;color:#ccc;margin-bottom:8px">1. Choose your plan</p>
-    <p style="font-size:14px;color:#ccc;margin-bottom:8px">2. We configure and brand the platform for your business (24-48 hours)</p>
-    <p style="font-size:14px;color:#ccc;margin-bottom:8px">3. Leads start flowing immediately</p>
-    <p style="font-size:14px;color:#ccc;margin-bottom:16px">4. Your sales team closes deals while we handle the pipeline</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px"><strong>Option A:</strong> Start with a subscription — leads flowing within 24 hours</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:8px"><strong>Option B:</strong> Own it outright — full platform, your brand, your data, forever</p>
+    <p style="font-size:14px;color:#ccc;margin-bottom:16px">Either way, your first leads are just one call away.</p>
     <p style="font-size:20px;color:#daa520;font-weight:800">📞 Schedule a demo call today</p>
     <p style="font-size:13px;color:#888;margin-top:8px">Contact us to see live results with real data from your market</p>
   </div>
