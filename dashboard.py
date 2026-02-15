@@ -4,6 +4,8 @@
 import csv
 import io
 import os
+import threading
+import time as _time
 from flask import Flask, render_template_string, request, redirect, url_for, Response, jsonify, send_from_directory
 
 from config import DASHBOARD_HOST, DASHBOARD_PORT
@@ -14,6 +16,33 @@ from db import (
 )
 
 app = Flask(__name__)
+
+# --- Background scanner ---
+_scan_status = {"running": False, "last_run": None, "last_count": 0}
+
+def _run_scan_bg():
+    """Run scanner in background thread."""
+    from scanner import run_full_scan
+    _scan_status["running"] = True
+    try:
+        count = run_full_scan()
+        _scan_status["last_count"] = count
+        from datetime import datetime, timezone
+        _scan_status["last_run"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    finally:
+        _scan_status["running"] = False
+
+def _auto_scan_loop():
+    """Auto-scan every 2 hours."""
+    while True:
+        _time.sleep(10)  # initial delay
+        if not _scan_status["running"]:
+            _run_scan_bg()
+        _time.sleep(7190)  # ~2 hours
+
+# Start auto-scan thread
+_auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
+_auto_thread.start()
 
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -80,6 +109,16 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="stat-box"><span class="num">r/{{ stats.top_subreddit }}</span>Top Source</div>
     <div class="stat-box"><span class="num">{{ stats.high_intent }}</span>High Intent</div>
     <div class="stat-box"><span class="num">{{ stats.form_leads }}</span>Form Leads</div>
+    <div class="stat-box" style="margin-left:auto">
+      {% if scan_status.running %}
+        <span class="num">⏳</span>Scanning...
+      {% else %}
+        <form method="post" action="/scan" style="display:inline">
+          <button style="background:#2a5;color:#fff;border:none;padding:8px 16px;border-radius:6px;cursor:pointer;font-weight:700;font-size:14px">🚀 Run Scan</button>
+        </form>
+        {% if scan_status.last_run %}<br><span style="font-size:11px;color:#666">Last: {{ scan_status.last_run }} ({{ scan_status.last_count }} leads)</span>{% endif %}
+      {% endif %}
+    </div>
   </div>
 </div>
 
@@ -198,8 +237,16 @@ def index():
         TEMPLATE,
         leads=leads, form_leads=get_form_leads(), stats=get_stats(), subreddits=get_subreddits(),
         min_score=min_score, subreddit=subreddit, date_from=date_from, contacted=contacted,
-        request=request,
+        scan_status=_scan_status, request=request,
     )
+
+
+@app.route("/scan", methods=["POST"])
+def trigger_scan():
+    if not _scan_status["running"]:
+        t = threading.Thread(target=_run_scan_bg, daemon=True)
+        t.start()
+    return redirect(url_for("index"))
 
 
 @app.route("/toggle/<int:lead_id>", methods=["POST"])
