@@ -1028,7 +1028,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
       <div style="font-size:13px;color:#888;margin-bottom:12px">One-time payment</div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
         <li>✅ Everything in Enterprise+</li>
-        <li>✅ Resell to ANY industry</li>
+        <li>✅ Resell within ONE licensed industry</li>
         <li>✅ Custom keyword packs per niche</li>
         <li>✅ Lifetime tech support</li>
         <li>✅ Keep 100% of client revenue</li>
@@ -1038,6 +1038,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
     </div>
   </div>
   <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">Enterprise licenses include full source code, documentation, and deployment assistance · Payment plans available</p>
+  <p style="text-align:center;font-size:12px;color:#666;margin-top:4px">⚖️ All licenses are industry-locked and non-transferable · Unauthorized resale subject to liquidated damages · Full IP retained by licensor</p>
 
   <h2>Next Steps</h2>
   <div style="background:#1a1200;border:1px solid #b8860b;border-radius:8px;padding:24px;text-align:center">
