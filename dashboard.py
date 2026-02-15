@@ -30,13 +30,19 @@ _scan_status = {"running": False, "last_run": None, "last_count": 0}
 
 def _run_scan_bg():
     """Run scanner in background thread."""
-    from scanner import run_full_scan
+    import traceback
     _scan_status["running"] = True
     try:
+        from scanner import run_full_scan
         count = run_full_scan()
         _scan_status["last_count"] = count
         from datetime import datetime, timezone
         _scan_status["last_run"] = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+        print(f"✅ Scan complete: {count} leads found")
+    except Exception as e:
+        print(f"❌ Scan error: {e}")
+        traceback.print_exc()
+        _scan_status["last_run"] = f"ERROR: {str(e)[:100]}"
     finally:
         _scan_status["running"] = False
 
@@ -52,12 +58,14 @@ def _auto_scan_loop():
         if not _scan_status["running"]:
             _run_scan_bg()
 
-# Start auto-scan thread
-_auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
-_auto_thread.start()
+# Start background threads only when running as main or under gunicorn
+def _start_background_threads():
+    _auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
+    _auto_thread.start()
+    start_poster_thread()
+    print("🚀 Background threads started (auto-scan + reply poster)")
 
-# Start reply poster thread
-start_poster_thread()
+_start_background_threads()
 
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
