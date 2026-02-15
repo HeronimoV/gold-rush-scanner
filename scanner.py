@@ -11,7 +11,8 @@ from config import (
     SUBREDDITS, KEYWORDS, MIN_SCORE_THRESHOLD,
     REDDIT_BASE_URL, USER_AGENT, REQUEST_DELAY, SCAN_INTERVAL_HOURS,
 )
-from db import insert_lead
+from db import insert_lead, is_lead_queued, add_to_queue, get_connection
+from templates import generate_reply
 
 logging.basicConfig(
     level=logging.INFO,
@@ -19,6 +20,26 @@ logging.basicConfig(
     datefmt="%Y-%m-%d %H:%M:%S",
 )
 log = logging.getLogger("scanner")
+
+def _auto_queue_lead(author, content, subreddit, score, url):
+    """Auto-queue a reply for high-intent leads."""
+    if score < 7:
+        return
+    try:
+        conn = get_connection()
+        row = conn.execute("SELECT id FROM leads WHERE url = ?", (url,)).fetchone()
+        conn.close()
+        if not row:
+            return
+        lead_id = row["id"]
+        if is_lead_queued(lead_id):
+            return
+        reply = generate_reply(author, content, subreddit, score)
+        add_to_queue(lead_id, reply, url)
+        log.info(f"Auto-queued reply for lead #{lead_id} (score={score})")
+    except Exception as e:
+        log.warning(f"Auto-queue failed: {e}")
+
 
 session = requests.Session()
 session.headers.update({"User-Agent": USER_AGENT})
@@ -93,6 +114,7 @@ def process_post(post_data, subreddit):
         inserted = insert_lead("reddit", author, text[:2000], url, subreddit, score, ts)
         if inserted:
             log.info(f"Lead: u/{author} (score={score}) — {', '.join(k for k,_ in matches)}")
+            _auto_queue_lead(author, text[:2000], subreddit, score, url)
             if score >= 8:
                 try:
                     from notifications import notify_high_intent_lead
@@ -119,6 +141,7 @@ def process_comment(comment_data, subreddit):
         inserted = insert_lead("reddit", author, body[:2000], url, subreddit, score, ts)
         if inserted:
             log.info(f"Lead: u/{author} (score={score}) — {', '.join(k for k,_ in matches)}")
+            _auto_queue_lead(author, body[:2000], subreddit, score, url)
             if score >= 8:
                 try:
                     from notifications import notify_high_intent_lead

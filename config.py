@@ -124,3 +124,9 @@ NOTIFY_EMAIL = None  # recipient for alerts
 
 # Webhook notifications (Slack/Discord)
 WEBHOOK_URL = None
+
+# Reddit API credentials for reply posting (via PRAW)
+REDDIT_CLIENT_ID = None
+REDDIT_CLIENT_SECRET = None
+REDDIT_USERNAME = None
+REDDIT_PASSWORD = None

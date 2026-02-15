@@ -13,9 +13,11 @@ from db import (
     get_leads, mark_contacted, get_subreddits, get_stats,
     update_notes, insert_form_lead, get_form_leads,
     update_form_lead_notes, mark_form_lead_contacted,
+    get_queue_items, get_queue_stats, update_queue_status, add_to_queue,
 )
 from templates import generate_reply
 from reports import generate_weekly_report
+from reply_queue import approve_reply, skip_reply, reddit_configured, start_poster_thread
 
 app = Flask(__name__)
 
@@ -45,6 +47,9 @@ def _auto_scan_loop():
 # Start auto-scan thread
 _auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
 _auto_thread.start()
+
+# Start reply poster thread
+start_poster_thread()
 
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -135,6 +140,7 @@ TEMPLATE = """<!DOCTYPE html>
 <div class="tabs">
   <button class="tab active" onclick="switchTab('scanner')">🔍 Scanner Leads</button>
   <button class="tab" onclick="switchTab('form')">📋 Form Submissions</button>
+  <button class="tab" onclick="switchTab('queue')">📤 Reply Queue{% if queue_stats.pending %} <span style="background:#b8860b;color:#000;border-radius:10px;padding:1px 7px;font-size:11px;margin-left:4px">{{ queue_stats.pending }}</span>{% endif %}</button>
 </div>
 
 <div id="tab-scanner" class="tab-content active">
@@ -226,6 +232,68 @@ TEMPLATE = """<!DOCTYPE html>
 </div>
 </div>
 
+<div id="tab-queue" class="tab-content">
+<div class="container">
+  <div style="display:flex;gap:16px;flex-wrap:wrap;margin-bottom:20px">
+    <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#daa520">{{ queue_stats.pending }}</span>Pending</div>
+    <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#f0ad4e">{{ queue_stats.approved }}</span>Approved</div>
+    <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#2a5">{{ queue_stats.posted_today }}</span>Posted Today</div>
+    <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#2a5">{{ queue_stats.total_posted }}</span>Total Posted</div>
+    <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#d9534f">{{ queue_stats.failed }}</span>Failed</div>
+    {% if not reddit_configured %}
+    <div style="background:#3a2a0a;border:1px solid #b8860b;border-radius:6px;padding:10px 16px;font-size:13px;color:#daa520;display:flex;align-items:center;gap:8px">
+      ⚠️ Reddit credentials not configured — replies can be queued but not auto-posted. Set REDDIT_CLIENT_ID, REDDIT_CLIENT_SECRET, REDDIT_USERNAME, REDDIT_PASSWORD in config.py
+    </div>
+    {% endif %}
+  </div>
+  {% if queue_items %}
+  {% for item in queue_items %}
+  <div style="background:#1a1d27;border:1px solid #2a2d37;border-radius:8px;padding:16px;margin-bottom:12px;{% if item.status == 'pending' %}border-left:3px solid #f0ad4e{% elif item.status == 'posted' %}border-left:3px solid #2a5{% elif item.status == 'failed' %}border-left:3px solid #d9534f{% elif item.status == 'approved' %}border-left:3px solid #5bc0de{% else %}border-left:3px solid #555{% endif %}">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+      <div>
+        <span style="font-weight:700;color:#daa520">u/{{ item.username or 'unknown' }}</span>
+        <span style="color:#666;font-size:12px;margin-left:8px">r/{{ item.subreddit or '?' }}</span>
+        {% if item.intent_score %}<span class="score {{ 's-high' if item.intent_score >= 7 else 's-med' if item.intent_score >= 4 else 's-low' }}" style="margin-left:8px">{{ item.intent_score }}</span>{% endif %}
+      </div>
+      <div>
+        {% if item.status == 'pending' %}<span style="background:#f0ad4e;color:#000;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Pending</span>
+        {% elif item.status == 'approved' %}<span style="background:#5bc0de;color:#000;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Approved</span>
+        {% elif item.status == 'posted' %}<span style="background:#2a5;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">✅ Posted</span>
+        {% elif item.status == 'skipped' %}<span style="background:#555;color:#ccc;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">Skipped</span>
+        {% elif item.status == 'failed' %}<span style="background:#d9534f;color:#fff;padding:2px 8px;border-radius:10px;font-size:11px;font-weight:600">❌ Failed</span>{% endif %}
+        <span style="color:#666;font-size:11px;margin-left:8px">{{ item.created_at[:16] }}</span>
+      </div>
+    </div>
+    <div style="background:#252830;border-radius:4px;padding:10px;font-size:12px;color:#aaa;margin-bottom:10px;max-height:60px;overflow:hidden">
+      <strong style="color:#888">Original:</strong> {{ (item.lead_content or '')[:300] }}
+    </div>
+    {% if item.status in ('pending', 'failed') %}
+    <form method="post" action="/queue/approve/{{ item.id }}">
+      <textarea name="reply_text" style="width:100%;min-height:100px;background:#252830;color:#e0e0e0;border:1px solid #3a3d47;border-radius:4px;padding:10px;font-size:13px;font-family:inherit;resize:vertical;margin-bottom:8px">{{ item.reply_text }}</textarea>
+      <div style="display:flex;gap:8px">
+        <button type="submit" style="background:#2a5;color:#fff;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-weight:600;font-size:13px">✅ Approve & Post</button>
+        <button type="submit" formaction="/queue/skip/{{ item.id }}" style="background:#555;color:#ccc;border:none;padding:8px 16px;border-radius:4px;cursor:pointer;font-size:13px">⏭️ Skip</button>
+        <a href="{{ item.target_url }}" target="_blank" style="padding:8px 16px;font-size:13px;color:#daa520;display:flex;align-items:center">🔗 View on Reddit</a>
+      </div>
+    </form>
+    {% elif item.status == 'posted' %}
+    <div style="font-size:12px;color:#888;white-space:pre-wrap;max-height:80px;overflow:hidden">{{ item.reply_text[:300] }}</div>
+    {% if item.posted_at %}<div style="font-size:11px;color:#666;margin-top:4px">Posted: {{ item.posted_at[:16] }}</div>{% endif %}
+    {% elif item.status == 'approved' %}
+    <div style="font-size:12px;color:#5bc0de;white-space:pre-wrap;max-height:80px;overflow:hidden">{{ item.reply_text[:300] }}</div>
+    <div style="font-size:11px;color:#666;margin-top:4px">⏳ Waiting to post (rate limited)...</div>
+    {% else %}
+    <div style="font-size:12px;color:#888;white-space:pre-wrap;max-height:80px;overflow:hidden">{{ item.reply_text[:300] }}</div>
+    {% endif %}
+    {% if item.error_message %}<div style="font-size:11px;color:#d9534f;margin-top:4px">Error: {{ item.error_message }}</div>{% endif %}
+  </div>
+  {% endfor %}
+  {% else %}
+  <div class="empty">No replies in queue yet. High-intent leads (score ≥ 7) are auto-queued during scans.</div>
+  {% endif %}
+</div>
+</div>
+
 <div class="modal-overlay" id="replyModal">
   <div class="modal">
     <h3>📝 Draft Reply for <span id="replyUser"></span></h3>
@@ -290,6 +358,8 @@ def index():
         leads=leads, form_leads=get_form_leads(), stats=get_stats(), subreddits=get_subreddits(),
         min_score=min_score, subreddit=subreddit, date_from=date_from, contacted=contacted,
         scan_status=_scan_status, request=request,
+        queue_items=get_queue_items(), queue_stats=get_queue_stats(),
+        reddit_configured=reddit_configured(),
     )
 
 
@@ -382,6 +452,25 @@ def weekly_report():
 @app.route("/apply")
 def landing_page():
     return send_from_directory(os.path.join(app.root_path, "landing"), "index.html")
+
+
+@app.route("/queue/approve/<int:queue_id>", methods=["POST"])
+def queue_approve(queue_id):
+    reply_text = request.form.get("reply_text", "").strip()
+    if reply_text:
+        from db import get_connection
+        conn = get_connection()
+        conn.execute("UPDATE reply_queue SET reply_text = ? WHERE id = ?", (reply_text, queue_id))
+        conn.commit()
+        conn.close()
+    approve_reply(queue_id)
+    return redirect(url_for("index") + "#tab-queue")
+
+
+@app.route("/queue/skip/<int:queue_id>", methods=["POST"])
+def queue_skip(queue_id):
+    skip_reply(queue_id)
+    return redirect(url_for("index") + "#tab-queue")
 
 
 @app.route("/export")

@@ -48,6 +48,23 @@ def init_db():
         )
     """)
 
+    # Reply queue table
+    conn.execute("""
+        CREATE TABLE IF NOT EXISTS reply_queue (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            lead_id INTEGER NOT NULL,
+            reply_text TEXT NOT NULL,
+            target_url TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            created_at TEXT NOT NULL,
+            posted_at TEXT,
+            error_message TEXT NOT NULL DEFAULT '',
+            FOREIGN KEY (lead_id) REFERENCES leads(id)
+        )
+    """)
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rq_status ON reply_queue(status)")
+    conn.execute("CREATE INDEX IF NOT EXISTS idx_rq_lead ON reply_queue(lead_id)")
+
     # Add notes column to existing leads table if missing
     try:
         conn.execute("ALTER TABLE leads ADD COLUMN notes TEXT NOT NULL DEFAULT ''")
@@ -201,6 +218,79 @@ def get_stats():
         "top_subreddit": top_subreddit,
         "form_leads": form_count,
     }
+
+
+def add_to_queue(lead_id, reply_text, target_url):
+    """Add a reply to the queue. Returns the new queue item id."""
+    conn = get_connection()
+    try:
+        cur = conn.execute(
+            "INSERT INTO reply_queue (lead_id, reply_text, target_url, status, created_at) VALUES (?, ?, ?, 'pending', ?)",
+            (lead_id, reply_text, target_url, datetime.now(timezone.utc).isoformat()),
+        )
+        conn.commit()
+        return cur.lastrowid
+    finally:
+        conn.close()
+
+
+def get_queue_items(status=None, limit=100):
+    """Fetch queue items, optionally filtered by status."""
+    conn = get_connection()
+    if status:
+        rows = conn.execute(
+            "SELECT rq.*, l.username, l.content as lead_content, l.subreddit, l.intent_score "
+            "FROM reply_queue rq LEFT JOIN leads l ON rq.lead_id = l.id "
+            "WHERE rq.status = ? ORDER BY rq.created_at DESC LIMIT ?",
+            (status, limit),
+        ).fetchall()
+    else:
+        rows = conn.execute(
+            "SELECT rq.*, l.username, l.content as lead_content, l.subreddit, l.intent_score "
+            "FROM reply_queue rq LEFT JOIN leads l ON rq.lead_id = l.id "
+            "ORDER BY CASE rq.status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 WHEN 'failed' THEN 2 WHEN 'posted' THEN 3 ELSE 4 END, rq.created_at DESC LIMIT ?",
+            (limit,),
+        ).fetchall()
+    conn.close()
+    return [dict(r) for r in rows]
+
+
+def update_queue_status(queue_id, status, error=None):
+    """Update a queue item's status."""
+    conn = get_connection()
+    if error is not None:
+        conn.execute("UPDATE reply_queue SET status = ?, error_message = ? WHERE id = ?", (status, error, queue_id))
+    else:
+        conn.execute("UPDATE reply_queue SET status = ? WHERE id = ?", (status, queue_id))
+    conn.commit()
+    conn.close()
+
+
+def get_queue_stats():
+    """Get reply queue statistics."""
+    conn = get_connection()
+    pending = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE status = 'pending'").fetchone()["c"]
+    approved = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE status = 'approved'").fetchone()["c"]
+    total_posted = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE status = 'posted'").fetchone()["c"]
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    posted_today = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE status = 'posted' AND posted_at >= ?", (today,)).fetchone()["c"]
+    failed = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE status = 'failed'").fetchone()["c"]
+    conn.close()
+    return {
+        "pending": pending,
+        "approved": approved,
+        "total_posted": total_posted,
+        "posted_today": posted_today,
+        "failed": failed,
+    }
+
+
+def is_lead_queued(lead_id):
+    """Check if a lead already has a queue entry."""
+    conn = get_connection()
+    row = conn.execute("SELECT COUNT(*) as c FROM reply_queue WHERE lead_id = ?", (lead_id,)).fetchone()
+    conn.close()
+    return row["c"] > 0
 
 
 # Auto-init on import
