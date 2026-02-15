@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Get a Quote — [Company Name]</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0a0a0a; color: #e0e0e0; line-height: 1.6; }
+
+  .hero { background: linear-gradient(135deg, #1a1a1a 0%, #0a0a0a 50%, #1a1200 100%); padding: 60px 20px; text-align: center; border-bottom: 2px solid #b8860b; }
+  .hero h1 { font-size: 2.5em; color: #daa520; margin-bottom: 10px; font-weight: 700; }
+  .hero p { font-size: 1.2em; color: #999; max-width: 600px; margin: 0 auto; }
+
+  .form-section { max-width: 560px; margin: -30px auto 40px; padding: 40px; background: #141414; border: 1px solid #2a2a2a; border-radius: 12px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); position: relative; z-index: 1; }
+  .form-section h2 { text-align: center; color: #daa520; margin-bottom: 24px; font-size: 1.3em; }
+
+  .field { margin-bottom: 18px; }
+  .field label { display: block; font-size: 13px; color: #999; margin-bottom: 5px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+  .field input, .field select, .field textarea {
+    width: 100%; padding: 12px 14px; background: #1e1e1e; border: 1px solid #333;
+    border-radius: 6px; color: #e0e0e0; font-size: 15px; transition: border 0.2s;
+  }
+  .field input:focus, .field select:focus, .field textarea:focus { border-color: #daa520; outline: none; }
+  .field select { appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%23999' viewBox='0 0 16 16'%3E%3Cpath d='M8 11L3 6h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; }
+
+  .submit-btn {
+    width: 100%; padding: 14px; background: linear-gradient(135deg, #b8860b, #daa520);
+    color: #000; font-size: 16px; font-weight: 700; border: none; border-radius: 6px;
+    cursor: pointer; text-transform: uppercase; letter-spacing: 1px; transition: transform 0.1s;
+  }
+  .submit-btn:hover { transform: translateY(-1px); }
+  .submit-btn:active { transform: translateY(0); }
+  .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .success { display: none; text-align: center; padding: 30px; }
+  .success h3 { color: #2a5; font-size: 1.4em; margin-bottom: 10px; }
+
+  .trust { max-width: 800px; margin: 40px auto; padding: 40px 20px; text-align: center; }
+  .trust h3 { color: #daa520; margin-bottom: 20px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 2px; }
+  .trust-badges { display: flex; justify-content: center; gap: 40px; flex-wrap: wrap; color: #666; font-size: 14px; }
+  .trust-badges .badge { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .trust-badges .badge .icon { font-size: 32px; }
+
+  .testimonials { max-width: 800px; margin: 0 auto 60px; padding: 0 20px; }
+  .testimonials h3 { text-align: center; color: #daa520; margin-bottom: 24px; font-size: 1.1em; text-transform: uppercase; letter-spacing: 2px; }
+  .testimonial-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; }
+  .testimonial { background: #141414; border: 1px solid #2a2a2a; border-radius: 8px; padding: 20px; }
+  .testimonial .stars { color: #daa520; margin-bottom: 8px; }
+  .testimonial p { font-size: 14px; color: #aaa; font-style: italic; }
+  .testimonial .author { margin-top: 10px; font-size: 13px; color: #666; }
+
+  footer { text-align: center; padding: 30px; color: #444; font-size: 13px; border-top: 1px solid #1a1a1a; }
+
+  @media (max-width: 600px) {
+    .hero { padding: 40px 15px; }
+    .hero h1 { font-size: 1.8em; }
+    .form-section { margin: -20px 15px 30px; padding: 24px; }
+    .trust-badges { gap: 20px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Get a Quote from a Top Precious Metals Dealer</h1>
+  <p>Trusted by thousands of investors across the country</p>
+</div>
+
+<div class="form-section">
+  <h2>Request Your Free Consultation</h2>
+  <form id="lead-form">
+    <div class="field">
+      <label>Full Name *</label>
+      <input type="text" name="name" required placeholder="John Smith">
+    </div>
+    <div class="field">
+      <label>Email Address *</label>
+      <input type="email" name="email" required placeholder="john@example.com">
+    </div>
+    <div class="field">
+      <label>Phone Number</label>
+      <input type="tel" name="phone" placeholder="(555) 123-4567">
+    </div>
+    <div class="field">
+      <label>I'm Interested In</label>
+      <select name="interest">
+        <option value="">Select...</option>
+        <option value="Gold">Gold</option>
+        <option value="Silver">Silver</option>
+        <option value="Both">Gold & Silver</option>
+        <option value="Platinum">Platinum</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Budget Range</label>
+      <select name="budget">
+        <option value="">Select...</option>
+        <option value="Under $1,000">Under $1,000</option>
+        <option value="$1,000 - $5,000">$1,000 – $5,000</option>
+        <option value="$5,000 - $25,000">$5,000 – $25,000</option>
+        <option value="$25,000 - $100,000">$25,000 – $100,000</option>
+        <option value="$100,000+">$100,000+</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>How Did You Hear About Us?</label>
+      <input type="text" name="referral_source" placeholder="Google, friend, social media...">
+    </div>
+    <button type="submit" class="submit-btn">Get My Free Quote</button>
+  </form>
+  <div class="success" id="success-msg">
+    <h3>✅ Thank You!</h3>
+    <p>A specialist will contact you within 24 hours.</p>
+  </div>
+</div>
+
+<div class="trust">
+  <h3>Why Choose [Company Name]</h3>
+  <div class="trust-badges">
+    <div class="badge"><span class="icon">🛡️</span>BBB A+ Rated</div>
+    <div class="badge"><span class="icon">⭐</span>4.9/5 Stars</div>
+    <div class="badge"><span class="icon">🔒</span>Secure Transactions</div>
+    <div class="badge"><span class="icon">📦</span>Insured Shipping</div>
+    <div class="badge"><span class="icon">🏆</span>15+ Years Experience</div>
+  </div>
+</div>
+
+<div class="testimonials">
+  <h3>What Our Clients Say</h3>
+  <div class="testimonial-grid">
+    <div class="testimonial">
+      <div class="stars">★★★★★</div>
+      <p>"Made my first gold purchase incredibly easy. Great prices and fast shipping."</p>
+      <div class="author">— Michael R., Texas</div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">★★★★★</div>
+      <p>"Best dealer I've worked with. Transparent pricing and excellent customer service."</p>
+      <div class="author">— Sarah K., Florida</div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">★★★★★</div>
+      <p>"Helped me set up my Gold IRA with no hassle. Highly recommend to anyone looking to diversify."</p>
+      <div class="author">— James T., California</div>
+    </div>
+  </div>
+</div>
+
+<footer>© 2025 [Company Name]. All rights reserved.</footer>
+
+<script>
+document.getElementById('lead-form').addEventListener('submit', async function(e) {
+  e.preventDefault();
+  const btn = this.querySelector('.submit-btn');
+  btn.disabled = true;
+  btn.textContent = 'Submitting...';
+
+  const data = Object.fromEntries(new FormData(this));
+  try {
+    const resp = await fetch('/api/submit-lead', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(data)
+    });
+    if (resp.ok) {
+      this.style.display = 'none';
+      document.getElementById('success-msg').style.display = 'block';
+    } else {
+      const err = await resp.json();
+      alert(err.error || 'Something went wrong. Please try again.');
+      btn.disabled = false;
+      btn.textContent = 'Get My Free Quote';
+    }
+  } catch {
+    alert('Connection error. Please try again.');
+    btn.disabled = false;
+    btn.textContent = 'Get My Free Quote';
+  }
+});
+</script>
+</body>
+</html>
