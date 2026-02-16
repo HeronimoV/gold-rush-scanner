@@ -328,6 +328,14 @@ def run_full_scan():
     except Exception as e:
         log.warning(f"Craigslist scan skipped: {e}")
 
+    # Facebook groups scan
+    try:
+        from facebook_scanner import run_facebook_scan
+        fb_total = run_facebook_scan()
+        total += fb_total
+    except Exception as e:
+        log.warning(f"Facebook scan skipped: {e}")
+
     log.info(f"Scan complete! {total} new leads found.")
     return total
 

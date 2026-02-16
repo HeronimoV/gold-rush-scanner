@@ -229,7 +229,7 @@ def run_web_scan(brave_api_key=None):
 
     # Also search specifically within known forums
     for forum_domain, forum_name in KNOWN_FORUMS.items():
-        query = f"site:{forum_domain} buy gold OR silver OR dealer OR invest"
+        query = f"site:{forum_domain} remodel OR renovation OR contractor Colorado OR Denver"
         log.info(f"  Searching forum: {forum_name}")
 
         results = search_brave_api(query, brave_api_key)

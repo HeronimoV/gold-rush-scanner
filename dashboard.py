@@ -932,10 +932,12 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   <h2>Platform Coverage</h2>
   <table>
     <tr><th>Platform</th><th>Status</th><th>Description</th></tr>
-    <tr><td>Reddit</td><td>✅ Live</td><td>11+ subreddits, real-time monitoring</td></tr>
-    <tr><td>YouTube</td><td>🟡 Ready</td><td>Comment scanning on precious metals videos</td></tr>
-    <tr><td>X / Twitter</td><td>🟡 Ready</td><td>Keyword monitoring for buying signals</td></tr>
-    <tr><td>Web Forums</td><td>🟡 Ready</td><td>Precious metals community forums</td></tr>
+    <tr><td>Reddit</td><td>✅ Live</td><td>19 subreddits (9 Colorado + 10 national), real-time monitoring</td></tr>
+    <tr><td>Craigslist</td><td>✅ Live</td><td>7 Colorado regions via RSS feeds — housing, services, gigs</td></tr>
+    <tr><td>Facebook</td><td>✅ Live</td><td>Colorado home improvement groups (Apify or Google fallback)</td></tr>
+    <tr><td>Web Forums</td><td>✅ Live</td><td>Houzz, Contractor Talk, DIY Chat Room, and more</td></tr>
+    <tr><td>YouTube</td><td>🟡 Ready</td><td>Comment scanning on remodeling videos (needs API key)</td></tr>
+    <tr><td>X / Twitter</td><td>🟡 Planned</td><td>Keyword monitoring for buying signals</td></tr>
   </table>
 
   <h2>ROI Projection</h2>

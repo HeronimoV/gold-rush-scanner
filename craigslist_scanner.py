@@ -1,131 +1,257 @@
 #!/usr/bin/env python3
-"""Craigslist scanner for local remodeling leads in Colorado via Google search."""
+"""Craigslist scanner for local remodeling leads in Colorado.
+
+Uses Craigslist's RSS feeds (XML) — no scraping needed, no rate limits.
+Each Colorado city has its own Craigslist subdomain with categorized feeds.
+"""
 
 import logging
 import re
 import time
+import xml.etree.ElementTree as ET
 import requests
 from datetime import datetime, timezone
+from html import unescape
 
-from config import USER_AGENT, REQUEST_DELAY, KEYWORDS
+from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY
 from db import insert_lead
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("craigslist")
 
-# Search Craigslist via Google (Craigslist blocks direct scraping)
-CRAIGSLIST_SEARCHES = [
-    'site:craigslist.org "remodel" denver OR "colorado springs" OR boulder OR "fort collins"',
-    'site:craigslist.org "kitchen remodel" colorado',
-    'site:craigslist.org "bathroom remodel" colorado',
-    'site:craigslist.org "contractor needed" denver OR colorado',
-    'site:craigslist.org "looking for contractor" denver OR colorado',
-    'site:craigslist.org "renovation" denver OR "colorado springs"',
-    'site:craigslist.org "home improvement" denver colorado',
+# Colorado Craigslist regions and their subdomains
+CO_REGIONS = {
+    "denver": "denver",
+    "cosprings": "cosprings",         # Colorado Springs
+    "boulder": "boulder",
+    "fortcollins": "fortcollins",
+    "pueblo": "pueblo",
+    "westslope": "westslope",         # Grand Junction / Western Slope
+    "highrockies": "highrockies",     # Summit / Eagle / etc.
+}
+
+# Craigslist categories where remodeling leads appear
+# Format: (category_path, category_name)
+CATEGORIES = [
+    # Housing — people looking for home services
+    ("search/hhh", "housing"),
+    # Services — people requesting contractor work
+    ("search/bbb", "services"),
+    # Gigs — people posting remodel gigs/jobs
+    ("search/ggg", "gigs"),
+    # For Sale > Materials — people buying remodel materials (might need contractor)
+    ("search/mat", "materials"),
+]
+
+# Search terms to append to RSS query (Craigslist supports query param)
+SEARCH_TERMS = [
+    "remodel",
+    "renovation",
+    "contractor",
+    "kitchen remodel",
+    "bathroom remodel",
+    "basement finish",
+    "home improvement",
+    "handyman",
+    "tile install",
+    "countertop",
+    "flooring",
+    "cabinet",
+    "deck build",
+    "home addition",
+    "general contractor",
+    "plumbing",
+    "drywall",
 ]
 
 session = requests.Session()
 session.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-    "Accept": "text/html,application/xhtml+xml",
-    "Accept-Language": "en-US,en;q=0.9",
+    "User-Agent": "Mozilla/5.0 (compatible; SocialProspector/2.0)",
+    "Accept": "application/rss+xml, application/xml, text/xml",
 })
 
+# Namespace for Craigslist RSS
+RDF_NS = {"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
+RSS_NS = {
+    "": "http://purl.org/rss/1.0/",
+    "dc": "http://purl.org/dc/elements/1.1/",
+    "enc": "http://purl.oclc.org/net/rss_2.0/enc#",
+}
 
-def search_google(query):
-    """Search Google and extract results."""
-    results = []
+
+def _clean_html(text):
+    """Strip HTML tags and decode entities."""
+    text = unescape(text)
+    text = re.sub(r'<[^>]+>', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    return text
+
+
+def score_listing(text):
+    """Score a Craigslist listing. Returns (score, matched_keywords).
+    
+    Craigslist Colorado posts get a +2 base boost since they're inherently local.
+    """
+    text_lower = text.lower()
+    matches = []
+    for keyword, weight in KEYWORDS.items():
+        if keyword in text_lower:
+            matches.append((keyword, weight))
+
+    if not matches:
+        # If we found it via remodel search term, give base score
+        return 5, [("📍 craigslist-CO", 5)]
+
+    best = max(w for _, w in matches)
+    bonus = min(len(matches) - 1, 2)
+    # +2 boost for being a local Colorado Craigslist post
+    score = min(best + bonus + 2, 10)
+    matches.append(("📍 craigslist-CO", 2))
+    return score, matches
+
+
+def fetch_rss_feed(region, category_path, search_term):
+    """Fetch a Craigslist RSS feed for a specific region/category/search."""
+    subdomain = CO_REGIONS[region]
+    # Craigslist RSS feed URL format
+    url = f"https://{subdomain}.craigslist.org/{category_path}?format=rss&query={requests.utils.quote(search_term)}&sort=date"
+
     try:
-        url = f"https://www.google.com/search?q={requests.utils.quote(query)}&num=15"
         resp = session.get(url, timeout=15)
-        if resp.status_code == 200:
-            # Extract titles and URLs from Google results
-            # Look for Craigslist links
-            links = re.findall(r'href="(https?://[a-z]+\.craigslist\.org/[^"]+)"', resp.text)
-            titles = re.findall(r'<h3[^>]*>(.*?)</h3>', resp.text)
-            snippets = re.findall(r'<span class="[^"]*">([^<]{50,300})</span>', resp.text)
-            
-            for i, link in enumerate(links[:15]):
-                title = titles[i] if i < len(titles) else ""
-                snippet = snippets[i] if i < len(snippets) else ""
-                # Clean HTML tags from title
-                title = re.sub(r'<[^>]+>', '', title).strip()
-                if title or snippet:
-                    results.append({
+        if resp.status_code == 404:
+            return []  # Category doesn't exist in this region
+        if resp.status_code != 200:
+            log.debug(f"  RSS {resp.status_code} for {subdomain}/{category_path}?q={search_term}")
+            return []
+        return parse_rss(resp.text, region)
+    except Exception as e:
+        log.debug(f"  RSS error {subdomain}/{category_path}: {e}")
+        return []
+
+
+def parse_rss(xml_text, region):
+    """Parse Craigslist RSS XML into listings."""
+    items = []
+    try:
+        root = ET.fromstring(xml_text)
+
+        # Try RSS 2.0 format first
+        for item in root.findall(".//item"):
+            title_el = item.find("title")
+            link_el = item.find("link")
+            desc_el = item.find("description")
+            date_el = item.find("dc:date", {"dc": "http://purl.org/dc/elements/1.1/"})
+            if date_el is None:
+                date_el = item.find("pubDate")
+
+            title = title_el.text.strip() if title_el is not None and title_el.text else ""
+            link = link_el.text.strip() if link_el is not None and link_el.text else ""
+            desc = _clean_html(desc_el.text) if desc_el is not None and desc_el.text else ""
+            date = date_el.text.strip() if date_el is not None and date_el.text else ""
+
+            if title and link:
+                items.append({
+                    "title": title,
+                    "url": link,
+                    "description": desc,
+                    "date": date,
+                    "region": region,
+                })
+
+        # Try RDF/RSS 1.0 format (older Craigslist format)
+        if not items:
+            ns = "http://purl.org/rss/1.0/"
+            for item in root.findall(f".//{{{ns}}}item"):
+                title_el = item.find(f"{{{ns}}}title")
+                link_el = item.find(f"{{{ns}}}link")
+                desc_el = item.find(f"{{{ns}}}description")
+                date_el = item.find("{http://purl.org/dc/elements/1.1/}date")
+
+                title = title_el.text.strip() if title_el is not None and title_el.text else ""
+                link = link_el.text.strip() if link_el is not None and link_el.text else ""
+                desc = _clean_html(desc_el.text) if desc_el is not None and desc_el.text else ""
+                date = date_el.text.strip() if date_el is not None and date_el.text else ""
+
+                if title and link:
+                    items.append({
                         "title": title,
                         "url": link,
-                        "snippet": snippet,
+                        "description": desc,
+                        "date": date,
+                        "region": region,
                     })
-    except Exception as e:
-        log.warning(f"Google search error: {e}")
-    return results
+    except ET.ParseError as e:
+        log.debug(f"  XML parse error: {e}")
+    return items
 
 
-def score_listing(title, snippet=""):
-    """Score a listing based on keywords."""
-    combined = f"{title} {snippet}".lower()
-    best_score = 0
-    matched = []
-    for keyword, weight in KEYWORDS.items():
-        if keyword in combined:
-            matched.append((keyword, weight))
-            if weight > best_score:
-                best_score = weight
-    if not matched:
-        # Base score for Craigslist results (they searched for remodel terms)
-        return 6, [("craigslist-remodel", 6)]
-    bonus = min(len(matched) - 1, 2)
-    # Boost for being local Craigslist
-    return min(best_score + bonus + 2, 10), matched
+def process_listing(listing):
+    """Score and save a Craigslist listing as a lead."""
+    title = listing["title"]
+    desc = listing.get("description", "")
+    url = listing["url"]
+    region = listing["region"]
+    date_str = listing.get("date", "")
+
+    content = f"{title} {desc}".strip()
+    if len(content) < 15:
+        return 0
+
+    score, matches = score_listing(content)
+    if score < MIN_SCORE_THRESHOLD:
+        return 0
+
+    # Parse date or use now
+    try:
+        if date_str:
+            ts = date_str  # Already ISO format from Craigslist
+        else:
+            ts = datetime.now(timezone.utc).isoformat()
+    except Exception:
+        ts = datetime.now(timezone.utc).isoformat()
+
+    region_label = region.replace("cosprings", "CO Springs").replace("fortcollins", "Fort Collins").replace("westslope", "W. Slope").replace("highrockies", "High Rockies").title()
+
+    inserted = insert_lead(
+        "craigslist",
+        f"cl/{region_label}",
+        content[:2000],
+        url,
+        f"craigslist-{region}",
+        score,
+        ts,
+    )
+    if inserted:
+        match_str = ", ".join(k for k, _ in matches)
+        log.info(f"  Lead: cl/{region_label} (score={score}) — {match_str}")
+        return 1
+    return 0
 
 
 def run_craigslist_scan():
-    """Scan Craigslist Colorado via Google search."""
-    log.info(f"Scanning Craigslist via Google ({len(CRAIGSLIST_SEARCHES)} queries)...")
+    """Run Craigslist scan across all Colorado regions."""
+    log.info(f"Starting Craigslist scan — {len(CO_REGIONS)} regions, {len(CATEGORIES)} categories, {len(SEARCH_TERMS)} search terms")
     total = 0
     seen_urls = set()
-    
-    for query in CRAIGSLIST_SEARCHES:
-        results = search_google(query)
-        log.info(f"  Found {len(results)} results for: {query[:60]}...")
-        
-        for r in results:
-            url = r["url"]
-            if url in seen_urls:
-                continue
-            seen_urls.add(url)
-            
-            title = r["title"]
-            snippet = r["snippet"]
-            content = f"{title} {snippet}".strip()
-            
-            if not content or len(content) < 10:
-                continue
-            
-            score, matches = score_listing(title, snippet)
-            
-            # Extract region from URL
-            region_match = re.match(r'https?://([a-z]+)\.craigslist', url)
-            region = region_match.group(1) if region_match else "colorado"
-            
-            ts = datetime.now(timezone.utc).isoformat()
-            inserted = insert_lead(
-                "craigslist",
-                f"cl/{region}",
-                content[:2000],
-                url,
-                f"craigslist-{region}",
-                score,
-                ts
-            )
-            if inserted:
-                match_str = ", ".join(k for k, _ in matches)
-                log.info(f"  Lead: cl/{region} (score={score}) — {match_str}")
-                total += 1
-        
-        time.sleep(REQUEST_DELAY + 1)  # extra delay for Google
-    
-    log.info(f"Craigslist scan complete: {total} new leads")
+
+    for region in CO_REGIONS:
+        region_leads = 0
+        for cat_path, cat_name in CATEGORIES:
+            for term in SEARCH_TERMS:
+                listings = fetch_rss_feed(region, cat_path, term)
+                for listing in listings:
+                    if listing["url"] in seen_urls:
+                        continue
+                    seen_urls.add(listing["url"])
+                    region_leads += process_listing(listing)
+                time.sleep(0.5)  # Light delay between RSS requests
+            time.sleep(REQUEST_DELAY)
+
+        if region_leads:
+            log.info(f"  {region}: {region_leads} new leads")
+        total += region_leads
+
+    log.info(f"Craigslist scan complete: {total} new leads from {len(seen_urls)} listings checked")
     return total
 
 
