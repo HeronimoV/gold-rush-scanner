@@ -63,9 +63,12 @@ def _start_background_threads():
     _auto_thread = threading.Thread(target=_auto_scan_loop, daemon=True)
     _auto_thread.start()
     start_poster_thread()
-    print("🚀 Background threads started (auto-scan + reply poster)")
+    print("🚀 Background threads started (auto-scan + reply poster)", flush=True)
 
+import sys as _sys
+print(f"🔧 Starting background threads...", file=_sys.stderr, flush=True)
 _start_background_threads()
+print(f"✅ Background threads launched", file=_sys.stderr, flush=True)
 
 TEMPLATE = """<!DOCTYPE html>
 <html lang="en">
@@ -430,6 +433,15 @@ def index():
         comp_leads=get_competitor_leads(), comp_stats=get_competitor_stats(),
     )
 
+
+@app.route("/api/status")
+def api_status():
+    """Quick status check endpoint."""
+    from db import get_connection
+    conn = get_connection()
+    total = conn.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
+    conn.close()
+    return {"scan_status": _scan_status, "total_leads": total}
 
 @app.route("/scan", methods=["POST"])
 def trigger_scan():

@@ -43,25 +43,17 @@ CATEGORIES = [
     ("search/mat", "materials"),
 ]
 
-# Search terms to append to RSS query (Craigslist supports query param)
+# Search terms — keep concise to avoid too many RSS calls
+# 7 regions × 4 categories × N terms = lots of requests
 SEARCH_TERMS = [
     "remodel",
     "renovation",
     "contractor",
-    "kitchen remodel",
-    "bathroom remodel",
-    "basement finish",
-    "home improvement",
+    "kitchen",
+    "bathroom",
+    "basement",
     "handyman",
-    "tile install",
-    "countertop",
-    "flooring",
-    "cabinet",
-    "deck build",
-    "home addition",
-    "general contractor",
-    "plumbing",
-    "drywall",
+    "home improvement",
 ]
 
 session = requests.Session()
