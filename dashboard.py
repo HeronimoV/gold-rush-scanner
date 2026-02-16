@@ -990,55 +990,57 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:20px 0">
     <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #888;border-radius:12px;padding:24px;text-align:center;background:#1a1a1a">
       <div style="font-size:14px;color:#888;text-transform:uppercase;letter-spacing:2px">🥉 Silver</div>
-      <div style="font-size:42px;font-weight:800;color:#c0c0c0;margin:12px 0">$897<span style="font-size:16px;color:#888">/mo</span></div>
+      <div style="font-size:42px;font-weight:800;color:#c0c0c0;margin:12px 0">$999<span style="font-size:16px;color:#888">/mo</span></div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
-        <li>✅ Reddit monitoring (8 subreddits)</li>
-        <li>✅ Up to 200 leads/month</li>
-        <li>✅ Intent scoring & deduplication</li>
-        <li>✅ Dashboard access</li>
+        <li>✅ Daily intelligence dashboard</li>
+        <li>✅ Reddit + Craigslist scanning</li>
+        <li>✅ AI intent scoring (1-10)</li>
+        <li>✅ Geographic filtering to your area</li>
+        <li>✅ Email alerts for hot leads (8+)</li>
         <li>✅ CSV export</li>
-        <li>✅ Email notifications</li>
-        <li>❌ Web forum scanning</li>
+        <li>✅ Scans every 2 hours</li>
+        <li>❌ Facebook & web forum scanning</li>
         <li>❌ Competitor monitoring</li>
-        <li>❌ Reply automation</li>
+        <li>❌ Reply templates</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#666">For businesses getting started with intent-based leads</div>
+      <div style="margin-top:16px;font-size:12px;color:#666">See who needs your services today — respond first</div>
     </div>
     <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;background:#1a1200;position:relative">
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#daa520;color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MOST POPULAR</div>
       <div style="font-size:14px;color:#daa520;text-transform:uppercase;letter-spacing:2px">🥇 Gold</div>
-      <div style="font-size:42px;font-weight:800;color:#daa520;margin:12px 0">$1,747<span style="font-size:16px;color:#888">/mo</span></div>
+      <div style="font-size:42px;font-weight:800;color:#daa520;margin:12px 0">$1,999<span style="font-size:16px;color:#888">/mo</span></div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
-        <li>✅ Reddit + Web forum monitoring</li>
-        <li>✅ Unlimited leads</li>
+        <li>✅ Everything in Silver</li>
+        <li>✅ All 5 platforms (Reddit, CL, FB, forums, YouTube)</li>
         <li>✅ Competitor complaint detection</li>
-        <li>✅ Reply queue with AI templates</li>
+        <li>✅ AI reply templates (review & post)</li>
         <li>✅ Branded landing page</li>
-        <li>✅ Analytics dashboard</li>
+        <li>✅ Full analytics dashboard</li>
         <li>✅ Weekly performance reports</li>
         <li>✅ Priority support</li>
-        <li>❌ X/Twitter & YouTube</li>
+        <li>❌ Exclusive territory</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#b8860b">For businesses ready to dominate local lead gen</div>
+      <div style="margin-top:16px;font-size:12px;color:#b8860b">Full platform access — see everything, respond to everything</div>
     </div>
-    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f">
+    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f;position:relative">
+      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#b9f2ff,#daa520);color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MAX ROI</div>
       <div style="font-size:14px;color:#b9f2ff;text-transform:uppercase;letter-spacing:2px">💎 Platinum</div>
-      <div style="font-size:42px;font-weight:800;color:#b9f2ff;margin:12px 0">$3,497<span style="font-size:16px;color:#888">/mo</span></div>
+      <div style="font-size:42px;font-weight:800;color:#b9f2ff;margin:12px 0">$4,999<span style="font-size:16px;color:#888">/mo</span></div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
         <li>✅ Everything in Gold</li>
-        <li>✅ X/Twitter monitoring</li>
-        <li>✅ YouTube comment scanning</li>
-        <li>✅ AI-powered intent analysis</li>
-        <li>✅ Custom branded materials</li>
-        <li>✅ Monthly strategy call</li>
+        <li>🔒 <strong>Exclusive territory</strong> — YOUR city, no competitors</li>
+        <li>✅ Custom keyword tuning for your specialty</li>
         <li>✅ Dedicated account manager</li>
-        <li>✅ API access</li>
-        <li>✅ White-label option</li>
+        <li>✅ Monthly strategy call</li>
+        <li>✅ Custom branded dashboard (your logo, colors)</li>
+        <li>✅ CRM integration (leads pushed to your system)</li>
+        <li>✅ Priority lead alerts (SMS/Slack/email)</li>
+        <li>✅ Quarterly ROI review</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#7ac8db">For top businesses who want every advantage</div>
+      <div style="margin-top:16px;font-size:12px;color:#7ac8db">Lock out your competition — only YOU see these leads in your area</div>
     </div>
   </div>
-  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include a $500 one-time setup fee · Annual billing saves 2 months · $1 first-week trial available</p>
+  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include onboarding & setup · Annual billing saves 2 months · 7-day money-back guarantee</p>
 
   <h2 style="margin-top:40px">Enterprise Licensing — Own It Outright</h2>
   <p style="text-align:center;color:#999;margin-bottom:20px;font-size:14px">Want full ownership instead of a monthly subscription? We'll build it, brand it, deploy it, and hand you the keys.</p>
