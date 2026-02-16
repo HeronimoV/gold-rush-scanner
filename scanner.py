@@ -11,6 +11,13 @@ from config import (
     SUBREDDITS, KEYWORDS, MIN_SCORE_THRESHOLD,
     REDDIT_BASE_URL, USER_AGENT, REQUEST_DELAY, SCAN_INTERVAL_HOURS,
 )
+
+# Import location targeting if configured
+try:
+    from config import TARGET_LOCATIONS, LOCATION_SCORE_BOOST
+except ImportError:
+    TARGET_LOCATIONS = []
+    LOCATION_SCORE_BOOST = 0
 from db import insert_lead, is_lead_queued, add_to_queue, get_connection
 from templates import generate_reply
 
@@ -45,18 +52,41 @@ session = requests.Session()
 session.headers.update({"User-Agent": USER_AGENT})
 
 
+def _check_location(text_lower):
+    """Check if text mentions a target location. Returns matched location or None."""
+    if not TARGET_LOCATIONS:
+        return None
+    for loc in TARGET_LOCATIONS:
+        if loc in text_lower:
+            return loc
+    return None
+
+
 def score_text(text):
-    """Score text based on keyword matches. Returns (score, matched_keywords)."""
+    """Score text based on keyword matches + location boost. Returns (score, matched_keywords)."""
     text_lower = text.lower()
     matches = []
     for keyword, weight in KEYWORDS.items():
         if keyword in text_lower:
             matches.append((keyword, weight))
     if not matches:
+        # Even with no keyword match, if they mention a target location in a
+        # relevant subreddit, give it a base score
+        location = _check_location(text_lower)
+        if location and any(kw in text_lower for kw in ["remodel", "renovate", "contractor", "kitchen", "bathroom", "remodeler"]):
+            return min(LOCATION_SCORE_BOOST + 3, 10), [(f"📍 {location}", LOCATION_SCORE_BOOST + 3)]
         return 0, []
     best = max(w for _, w in matches)
     bonus = min(len(matches) - 1, 2)
-    return min(best + bonus, 10), matches
+    score = best + bonus
+    
+    # Location boost — if post mentions a target location, boost the score
+    location = _check_location(text_lower)
+    if location:
+        score += LOCATION_SCORE_BOOST
+        matches.append((f"📍 {location}", LOCATION_SCORE_BOOST))
+    
+    return min(score, 10), matches
 
 
 def fetch_subreddit(subreddit, sort="new", limit=50):
@@ -189,7 +219,7 @@ def scan_subreddit(subreddit, check_comments=True):
 def run_full_scan():
     """Run a complete scan across all configured subreddits."""
     log.info("=" * 50)
-    log.info("Gold Rush Scanner — Starting full scan")
+    log.info("Social Prospector — Starting full scan")
     log.info(f"Subreddits: {len(SUBREDDITS)} | Keywords: {len(KEYWORDS)} | Min score: {MIN_SCORE_THRESHOLD}")
     log.info("=" * 50)
 
@@ -224,6 +254,14 @@ def run_full_scan():
         total += comp_total
     except Exception as e:
         log.warning(f"Competitor scan skipped: {e}")
+
+    # Craigslist scan (local leads)
+    try:
+        from craigslist_scanner import run_craigslist_scan
+        cl_total = run_craigslist_scan()
+        total += cl_total
+    except Exception as e:
+        log.warning(f"Craigslist scan skipped: {e}")
 
     log.info(f"Scan complete! {total} new leads found.")
     return total

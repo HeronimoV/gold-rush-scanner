@@ -17,16 +17,21 @@ log = logging.getLogger("web_scanner")
 
 # Search queries for finding gold/silver buying discussions
 SEARCH_QUERIES = [
+    # Colorado-specific searches
+    '"looking for a contractor" Denver remodel',
+    '"need a remodeler" Colorado',
+    '"recommend a contractor" Denver',
+    '"kitchen remodel" Denver contractor',
+    '"bathroom remodel" Colorado Springs',
+    '"remodel" "Colorado" contractor recommendations',
+    '"contractor recommendations" Boulder remodel',
+    '"Fort Collins" remodel contractor',
+    '"high end finishes" Denver renovation',
+    '"luxury remodel" Colorado',
+    # General (will catch CO mentions)
     '"looking for a contractor" remodel',
     '"need a remodeler" kitchen bathroom',
-    '"recommend a contractor" renovation',
     '"how to find a good contractor" remodel',
-    '"kitchen remodel" looking for contractor',
-    '"bathroom remodel" recommend',
-    '"high end finishes" contractor',
-    '"luxury remodel" contractor recommendations',
-    '"whole house renovation" hiring contractor',
-    '"getting quotes" remodel contractor',
 ]
 
 # Known forums to target

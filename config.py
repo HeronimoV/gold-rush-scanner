@@ -1,7 +1,27 @@
 """Configuration for Social Prospector — Home Remodeling & High-End Finishes."""
 
-# Subreddits to monitor
+# Subreddits to monitor — National + Colorado-specific
 SUBREDDITS = [
+    # Colorado local subreddits
+    "Denver",
+    "Colorado",
+    "ColoradoSprings",
+    "FortCollins",
+    "Boulder",
+    "AuroraCO",
+    "Lakewood",
+    "Pueblo",
+    "GrandJunction",
+    "Longmont",
+    "Loveland",
+    "Greeley",
+    "Arvada",
+    "Westminster",
+    "Thornton",
+    "Centennial",
+    "Broomfield",
+    "CastleRock",
+    # National (will filter for CO mentions)
     "HomeImprovement",
     "HomeRenovation",
     "Remodeling",
@@ -16,6 +36,23 @@ SUBREDDITS = [
     "Renovations",
     "Contractors",
 ]
+
+# Location targeting — Colorado cities and areas
+# Posts mentioning these get a score boost
+TARGET_LOCATIONS = [
+    "denver", "colorado springs", "aurora", "fort collins", "lakewood",
+    "thornton", "arvada", "westminster", "pueblo", "centennial",
+    "boulder", "greeley", "longmont", "loveland", "broomfield",
+    "castle rock", "parker", "commerce city", "littleton", "northglenn",
+    "brighton", "englewood", "wheat ridge", "golden", "erie",
+    "lafayette", "louisville", "superior", "firestone", "frederick",
+    "dacono", "highlands ranch", "lone tree", "cherry creek",
+    "stapleton", "wash park", "capitol hill", "lodo", "rino",
+    "five points", "park hill", "sloan lake", "congress park",
+    "colorado", "front range", "springs", "co springs",
+    "denvr",  # common misspelling
+]
+LOCATION_SCORE_BOOST = 3  # boost score by this much if location detected
 
 # Keywords and their base intent weights (1-10)
 # Higher weight = stronger buying intent
