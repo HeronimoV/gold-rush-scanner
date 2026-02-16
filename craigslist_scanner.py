@@ -1,17 +1,16 @@
 #!/usr/bin/env python3
-"""Craigslist scanner for local remodeling leads in Colorado.
+"""Craigslist scanner for local remodeling leads via Google/Brave search.
 
-Uses Craigslist's RSS feeds (XML) — no scraping needed, no rate limits.
-Each Colorado city has its own Craigslist subdomain with categorized feeds.
+Craigslist blocks direct RSS from cloud servers, so we search for
+Craigslist posts via search engines instead.
 """
 
 import logging
+import os
 import re
 import time
-import xml.etree.ElementTree as ET
 import requests
 from datetime import datetime, timezone
-from html import unescape
 
 from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY, PROFILE_CRAIGSLIST_REGIONS
 from db import insert_lead
@@ -19,79 +18,69 @@ from db import insert_lead
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("craigslist")
 
-# All known Craigslist regions (used for lookup)
-ALL_REGIONS = {
-    "denver": "denver", "cosprings": "cosprings", "boulder": "boulder",
-    "fortcollins": "fortcollins", "pueblo": "pueblo",
-    "westslope": "westslope", "highrockies": "highrockies",
-    # Add more as needed for other states
-    "losangeles": "losangeles", "sfbay": "sfbay", "chicago": "chicago",
-    "newyork": "newyork", "seattle": "seattle", "austin": "austin",
-    "dallas": "dallas", "houston": "houston", "phoenix": "phoenix",
-    "atlanta": "atlanta", "miami": "miami", "boston": "boston",
-    "portland": "portland", "sandiego": "sandiego",
+# Build search queries from profile regions
+_regions = PROFILE_CRAIGSLIST_REGIONS or []
+_region_names = {
+    "denver": "Denver", "cosprings": "Colorado Springs", "boulder": "Boulder",
+    "fortcollins": "Fort Collins", "pueblo": "Pueblo", "westslope": "Grand Junction",
+    "highrockies": "High Rockies", "losangeles": "Los Angeles", "sfbay": "San Francisco",
+    "chicago": "Chicago", "newyork": "New York", "seattle": "Seattle",
+    "austin": "Austin", "dallas": "Dallas", "phoenix": "Phoenix",
 }
 
-# Active regions from profile (or default Colorado)
-CO_REGIONS = {}
-_profile_regions = PROFILE_CRAIGSLIST_REGIONS or ["denver", "cosprings", "boulder", "fortcollins", "pueblo", "westslope", "highrockies"]
-for _r in _profile_regions:
-    CO_REGIONS[_r] = ALL_REGIONS.get(_r, _r)
-
-# Craigslist categories where remodeling leads appear
-# Format: (category_path, category_name)
-CATEGORIES = [
-    # Housing — people looking for home services
-    ("search/hhh", "housing"),
-    # Services — people requesting contractor work
-    ("search/bbb", "services"),
-    # Gigs — people posting remodel gigs/jobs
-    ("search/ggg", "gigs"),
-    # For Sale > Materials — people buying remodel materials (might need contractor)
-    ("search/mat", "materials"),
-]
-
-# Search terms — keep concise to avoid too many RSS calls
-# 7 regions × 4 categories × N terms = lots of requests
-SEARCH_TERMS = [
-    "remodel",
-    "renovation",
-    "contractor",
-    "kitchen",
-    "bathroom",
-    "basement",
-    "handyman",
-    "home improvement",
-]
+# Generate search queries from regions + remodel terms
+SEARCH_QUERIES = []
+_search_terms = ["remodel", "contractor", "kitchen remodel", "bathroom remodel", "renovation", "handyman"]
+for region in _regions[:4]:  # Limit to top 4 regions to avoid too many queries
+    name = _region_names.get(region, region)
+    for term in _search_terms[:3]:  # Top 3 terms per region
+        SEARCH_QUERIES.append(f'site:{region}.craigslist.org "{term}"')
+    # Also broader search
+    SEARCH_QUERIES.append(f'site:craigslist.org "{name}" remodel OR contractor OR renovation')
 
 session = requests.Session()
 session.headers.update({
-    "User-Agent": "Mozilla/5.0 (compatible; SocialProspector/2.0)",
-    "Accept": "application/rss+xml, application/xml, text/xml",
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36",
+    "Accept": "text/html,application/xhtml+xml",
+    "Accept-Language": "en-US,en;q=0.9",
 })
 
-# Namespace for Craigslist RSS
-RDF_NS = {"rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#"}
-RSS_NS = {
-    "": "http://purl.org/rss/1.0/",
-    "dc": "http://purl.org/dc/elements/1.1/",
-    "enc": "http://purl.oclc.org/net/rss_2.0/enc#",
-}
+
+def search_brave(query, api_key):
+    """Search via Brave API."""
+    url = "https://api.search.brave.com/res/v1/web/search"
+    headers = {"Accept": "application/json", "X-Subscription-Token": api_key}
+    params = {"q": query, "count": 15}
+    try:
+        resp = requests.get(url, headers=headers, params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+        return [{"url": r["url"], "title": r.get("title", ""), "snippet": r.get("description", "")}
+                for r in data.get("web", {}).get("results", [])]
+    except Exception as e:
+        log.debug(f"Brave search error: {e}")
+        return []
 
 
-def _clean_html(text):
-    """Strip HTML tags and decode entities."""
-    text = unescape(text)
-    text = re.sub(r'<[^>]+>', ' ', text)
-    text = re.sub(r'\s+', ' ', text).strip()
-    return text
+def search_google(query):
+    """Search Google and extract Craigslist results."""
+    results = []
+    try:
+        url = f"https://www.google.com/search?q={requests.utils.quote(query)}&num=15"
+        resp = session.get(url, timeout=15)
+        if resp.status_code == 200:
+            links = re.findall(r'href="(https?://[a-z]+\.craigslist\.org/[^"]+)"', resp.text)
+            titles = re.findall(r'<h3[^>]*>(.*?)</h3>', resp.text)
+            for i, link in enumerate(links[:15]):
+                title = re.sub(r'<[^>]+>', '', titles[i]).strip() if i < len(titles) else ""
+                results.append({"url": link, "title": title, "snippet": ""})
+    except Exception as e:
+        log.debug(f"Google search error: {e}")
+    return results
 
 
 def score_listing(text):
-    """Score a Craigslist listing. Returns (score, matched_keywords).
-    
-    Craigslist Colorado posts get a +2 base boost since they're inherently local.
-    """
+    """Score a Craigslist listing. +2 boost for being local."""
     text_lower = text.lower()
     matches = []
     for keyword, weight in KEYWORDS.items():
@@ -99,159 +88,61 @@ def score_listing(text):
             matches.append((keyword, weight))
 
     if not matches:
-        # If we found it via remodel search term, give base score
-        return 5, [("📍 craigslist-CO", 5)]
+        return 5, [("📍 craigslist", 5)]
 
     best = max(w for _, w in matches)
     bonus = min(len(matches) - 1, 2)
-    # +2 boost for being a local Colorado Craigslist post
     score = min(best + bonus + 2, 10)
-    matches.append(("📍 craigslist-CO", 2))
+    matches.append(("📍 craigslist", 2))
     return score, matches
 
 
-def fetch_rss_feed(region, category_path, search_term):
-    """Fetch a Craigslist RSS feed for a specific region/category/search."""
-    subdomain = CO_REGIONS[region]
-    # Craigslist RSS feed URL format
-    url = f"https://{subdomain}.craigslist.org/{category_path}?format=rss&query={requests.utils.quote(search_term)}&sort=date"
-
-    try:
-        resp = session.get(url, timeout=15)
-        if resp.status_code == 404:
-            return []  # Category doesn't exist in this region
-        if resp.status_code != 200:
-            log.debug(f"  RSS {resp.status_code} for {subdomain}/{category_path}?q={search_term}")
-            return []
-        return parse_rss(resp.text, region)
-    except Exception as e:
-        log.debug(f"  RSS error {subdomain}/{category_path}: {e}")
-        return []
-
-
-def parse_rss(xml_text, region):
-    """Parse Craigslist RSS XML into listings."""
-    items = []
-    try:
-        root = ET.fromstring(xml_text)
-
-        # Try RSS 2.0 format first
-        for item in root.findall(".//item"):
-            title_el = item.find("title")
-            link_el = item.find("link")
-            desc_el = item.find("description")
-            date_el = item.find("dc:date", {"dc": "http://purl.org/dc/elements/1.1/"})
-            if date_el is None:
-                date_el = item.find("pubDate")
-
-            title = title_el.text.strip() if title_el is not None and title_el.text else ""
-            link = link_el.text.strip() if link_el is not None and link_el.text else ""
-            desc = _clean_html(desc_el.text) if desc_el is not None and desc_el.text else ""
-            date = date_el.text.strip() if date_el is not None and date_el.text else ""
-
-            if title and link:
-                items.append({
-                    "title": title,
-                    "url": link,
-                    "description": desc,
-                    "date": date,
-                    "region": region,
-                })
-
-        # Try RDF/RSS 1.0 format (older Craigslist format)
-        if not items:
-            ns = "http://purl.org/rss/1.0/"
-            for item in root.findall(f".//{{{ns}}}item"):
-                title_el = item.find(f"{{{ns}}}title")
-                link_el = item.find(f"{{{ns}}}link")
-                desc_el = item.find(f"{{{ns}}}description")
-                date_el = item.find("{http://purl.org/dc/elements/1.1/}date")
-
-                title = title_el.text.strip() if title_el is not None and title_el.text else ""
-                link = link_el.text.strip() if link_el is not None and link_el.text else ""
-                desc = _clean_html(desc_el.text) if desc_el is not None and desc_el.text else ""
-                date = date_el.text.strip() if date_el is not None and date_el.text else ""
-
-                if title and link:
-                    items.append({
-                        "title": title,
-                        "url": link,
-                        "description": desc,
-                        "date": date,
-                        "region": region,
-                    })
-    except ET.ParseError as e:
-        log.debug(f"  XML parse error: {e}")
-    return items
-
-
-def process_listing(listing):
-    """Score and save a Craigslist listing as a lead."""
-    title = listing["title"]
-    desc = listing.get("description", "")
-    url = listing["url"]
-    region = listing["region"]
-    date_str = listing.get("date", "")
-
-    content = f"{title} {desc}".strip()
-    if len(content) < 15:
-        return 0
-
-    score, matches = score_listing(content)
-    if score < MIN_SCORE_THRESHOLD:
-        return 0
-
-    # Parse date or use now
-    try:
-        if date_str:
-            ts = date_str  # Already ISO format from Craigslist
-        else:
-            ts = datetime.now(timezone.utc).isoformat()
-    except Exception:
-        ts = datetime.now(timezone.utc).isoformat()
-
-    region_label = region.replace("cosprings", "CO Springs").replace("fortcollins", "Fort Collins").replace("westslope", "W. Slope").replace("highrockies", "High Rockies").title()
-
-    inserted = insert_lead(
-        "craigslist",
-        f"cl/{region_label}",
-        content[:2000],
-        url,
-        f"craigslist-{region}",
-        score,
-        ts,
-    )
-    if inserted:
-        match_str = ", ".join(k for k, _ in matches)
-        log.info(f"  Lead: cl/{region_label} (score={score}) — {match_str}")
-        return 1
-    return 0
-
-
 def run_craigslist_scan():
-    """Run Craigslist scan across all Colorado regions."""
-    log.info(f"Starting Craigslist scan — {len(CO_REGIONS)} regions, {len(CATEGORIES)} categories, {len(SEARCH_TERMS)} search terms")
+    """Scan Craigslist via search engines."""
+    if not SEARCH_QUERIES:
+        log.info("Craigslist scan skipped — no regions configured in profile")
+        return 0
+
+    log.info(f"Scanning Craigslist via search ({len(SEARCH_QUERIES)} queries)...")
     total = 0
     seen_urls = set()
+    brave_key = os.environ.get("BRAVE_API_KEY")
 
-    for region in CO_REGIONS:
-        region_leads = 0
-        for cat_path, cat_name in CATEGORIES:
-            for term in SEARCH_TERMS:
-                listings = fetch_rss_feed(region, cat_path, term)
-                for listing in listings:
-                    if listing["url"] in seen_urls:
-                        continue
-                    seen_urls.add(listing["url"])
-                    region_leads += process_listing(listing)
-                time.sleep(0.5)  # Light delay between RSS requests
-            time.sleep(REQUEST_DELAY)
+    for query in SEARCH_QUERIES:
+        log.info(f"  CL search: {query[:60]}...")
 
-        if region_leads:
-            log.info(f"  {region}: {region_leads} new leads")
-        total += region_leads
+        results = search_brave(query, brave_key) if brave_key else search_google(query)
 
-    log.info(f"Craigslist scan complete: {total} new leads from {len(seen_urls)} listings checked")
+        for r in results:
+            url = r["url"]
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+
+            content = f"{r['title']} {r['snippet']}".strip()
+            if len(content) < 15:
+                continue
+
+            score, matches = score_listing(content)
+            if score < MIN_SCORE_THRESHOLD:
+                continue
+
+            region_match = re.match(r'https?://([a-z]+)\.craigslist', url)
+            region = region_match.group(1) if region_match else "unknown"
+            region_label = _region_names.get(region, region).title()
+
+            ts = datetime.now(timezone.utc).isoformat()
+            inserted = insert_lead(
+                "craigslist", f"cl/{region_label}", content[:2000],
+                url, f"craigslist-{region}", score, ts,
+            )
+            if inserted:
+                log.info(f"  Lead: cl/{region_label} (score={score})")
+                total += 1
+
+        time.sleep(REQUEST_DELAY + 1)
+
+    log.info(f"Craigslist scan complete: {total} new leads")
     return total
 
 

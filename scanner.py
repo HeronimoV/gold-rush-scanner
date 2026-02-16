@@ -319,11 +319,14 @@ def run_full_scan():
         total += found
         time.sleep(REQUEST_DELAY)
 
+    import traceback as _tb
+
     # YouTube scan
     try:
         from youtube_scanner import run_youtube_scan
         yt_total = run_youtube_scan()
         total += yt_total
+        log.info(f"YouTube: {yt_total} leads")
     except Exception as e:
         log.warning(f"YouTube scan skipped: {e}")
 
@@ -334,32 +337,40 @@ def run_full_scan():
         brave_key = os.environ.get("BRAVE_API_KEY")
         web_total = run_web_scan(brave_key)
         total += web_total
+        log.info(f"Web forums: {web_total} leads")
     except Exception as e:
-        log.warning(f"Web scan skipped: {e}")
+        log.warning(f"Web scan error: {e}")
+        _tb.print_exc()
 
     # Competitor complaint scan
     try:
         from competitors import run_competitor_scan
         comp_total = run_competitor_scan()
         total += comp_total
+        log.info(f"Competitors: {comp_total} leads")
     except Exception as e:
-        log.warning(f"Competitor scan skipped: {e}")
+        log.warning(f"Competitor scan error: {e}")
+        _tb.print_exc()
 
     # Craigslist scan (local leads)
     try:
         from craigslist_scanner import run_craigslist_scan
         cl_total = run_craigslist_scan()
         total += cl_total
+        log.info(f"Craigslist: {cl_total} leads")
     except Exception as e:
-        log.warning(f"Craigslist scan skipped: {e}")
+        log.warning(f"Craigslist scan error: {e}")
+        _tb.print_exc()
 
     # Facebook groups scan
     try:
         from facebook_scanner import run_facebook_scan
         fb_total = run_facebook_scan()
         total += fb_total
+        log.info(f"Facebook: {fb_total} leads")
     except Exception as e:
-        log.warning(f"Facebook scan skipped: {e}")
+        log.warning(f"Facebook scan error: {e}")
+        _tb.print_exc()
 
     log.info(f"Scan complete! {total} new leads found.")
     return total

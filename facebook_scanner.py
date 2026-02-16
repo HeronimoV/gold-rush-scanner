@@ -301,13 +301,18 @@ def run_google_fb_scan():
 
 def run_facebook_scan():
     """Run Facebook scan — Apify if token available, else Google fallback."""
+    if not CO_FACEBOOK_GROUPS and not GOOGLE_FB_QUERIES:
+        log.info("Facebook scan skipped — no groups configured in profile")
+        return 0
+
     api_token = os.environ.get("APIFY_API_TOKEN")
 
     total = 0
-    if api_token:
+    if api_token and CO_FACEBOOK_GROUPS:
         total += run_apify_scan(api_token)
     else:
-        log.info("No APIFY_API_TOKEN — using Google search fallback for Facebook groups")
+        if not api_token:
+            log.info("No APIFY_API_TOKEN — using Google search fallback for Facebook groups")
         total += run_google_fb_scan()
 
     log.info(f"Facebook scan complete: {total} new leads")
