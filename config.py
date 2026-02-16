@@ -31,14 +31,19 @@ LOCAL_SUBREDDITS = [
 ]
 
 # Post MUST contain at least one of these terms in local subreddits
+# Keep these specific to remodeling — no generic words like "trim", "paint", "finish"
 LOCAL_REQUIRED_TERMS = [
     "remodel", "renovate", "renovation", "contractor", "remodeler",
-    "kitchen", "bathroom", "basement", "flooring", "countertop",
-    "cabinet", "tile", "backsplash", "hardwood", "paint",
-    "drywall", "plumbing", "electrical", "addition", "deck",
-    "patio", "finish", "trim", "molding", "built-in",
-    "handyman", "home improvement", "home repair", "fixer upper",
-    "general contractor", "gc ", "remodeling",
+    "kitchen remodel", "bathroom remodel", "basement remodel",
+    "flooring", "countertop", "cabinet", "backsplash", "hardwood floor",
+    "drywall", "plumbing", "electrical work", "home addition", "deck build",
+    "patio", "molding", "built-in", "handyman",
+    "home improvement", "home repair", "fixer upper", "fixer-upper",
+    "general contractor", "remodeling", "tile install", "tile work",
+    "new kitchen", "new bathroom", "gut reno", "demo day",
+    "knock down wall", "open concept", "new countertop", "new cabinet",
+    "roof repair", "roof replace", "siding", "window replace",
+    "hvac", "furnace", "water heater", "garage conversion",
 ]
 
 # Location targeting — Colorado cities and areas
@@ -69,7 +74,10 @@ KEYWORDS = {
     "need a remodeler": 10,
     "recommend a remodeler": 10,
     "who did your remodel": 9,
-    "looking for someone to": 9,
+    "looking for someone to remodel": 9,
+    "looking for someone to renovate": 9,
+    "looking for someone to build": 8,
+    "looking for someone to install": 8,
     "need someone to remodel": 10,
     "want to remodel": 9,
     "planning a remodel": 9,
@@ -83,10 +91,13 @@ KEYWORDS = {
     "reputable contractor": 9,
     "hire a contractor": 9,
     "hiring a contractor": 9,
-    "looking for recommendations": 8,
-    "any recommendations for": 8,
-    "can anyone recommend": 8,
-    "who would you recommend": 8,
+    "looking for contractor recommendations": 8,
+    "looking for remodeler recommendations": 8,
+    "any recommendations for contractor": 8,
+    "any recommendations for remodel": 8,
+    "can anyone recommend a contractor": 8,
+    "can anyone recommend a remodeler": 8,
+    "who would you recommend for": 7,
     "about to start a renovation": 9,
     "starting a kitchen remodel": 10,
     "starting a bathroom remodel": 10,
@@ -157,6 +168,19 @@ KEYWORDS = {
     "design ideas": 4,
     "inspiration": 3,
 }
+
+# Negative keywords — if post contains these, skip it entirely
+NEGATIVE_KEYWORDS = [
+    "things to do this weekend", "things to do in",
+    "events this week", "weekend events",
+    "hair salon", "hair stylist", "haircut",
+    "restaurant", "brunch", "happy hour",
+    "hiking trail", "camping", "ski",
+    "roommate", "sublease", "take over my lease", "relet",
+    "lost dog", "lost cat", "missing pet",
+    "job posting", "hiring for", "we're hiring",
+    "moving to", "moving from",
+]
 
 # Minimum intent score to save a lead
 MIN_SCORE_THRESHOLD = 4

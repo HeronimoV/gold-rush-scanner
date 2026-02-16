@@ -25,6 +25,16 @@ except ImportError:
     LOCAL_SUBREDDITS = []
     LOCAL_REQUIRED_TERMS = []
 
+try:
+    from config import NEGATIVE_KEYWORDS
+except ImportError:
+    NEGATIVE_KEYWORDS = []
+
+
+def _hits_negative_keyword(text_lower):
+    """Check if text matches a negative keyword (obvious non-remodeling)."""
+    return any(neg in text_lower for neg in NEGATIVE_KEYWORDS)
+
 
 def _passes_local_filter(text, subreddit):
     """For local subreddits, require remodeling-related terms."""
@@ -32,6 +42,23 @@ def _passes_local_filter(text, subreddit):
         return True  # national subreddits pass through
     text_lower = text.lower()
     return any(term in text_lower for term in LOCAL_REQUIRED_TERMS)
+
+
+def _is_colorado_relevant(text_lower, subreddit):
+    """Check if a lead from a national subreddit is relevant to Colorado.
+    
+    Local subreddits are inherently Colorado — always relevant.
+    National subreddits need either a Colorado location mention OR very high
+    keyword specificity (score >= 7 without location boost).
+    """
+    if subreddit in LOCAL_SUBREDDITS:
+        return True
+    # Check if they mention Colorado
+    if TARGET_LOCATIONS:
+        for loc in TARGET_LOCATIONS:
+            if loc in text_lower:
+                return True
+    return False  # national sub, no CO mention — will get score penalty
 from db import insert_lead, is_lead_queued, add_to_queue, get_connection
 from templates import generate_reply
 
@@ -76,8 +103,12 @@ def _check_location(text_lower):
     return None
 
 
-def score_text(text):
-    """Score text based on keyword matches + location boost. Returns (score, matched_keywords)."""
+def score_text(text, subreddit=None):
+    """Score text based on keyword matches + location boost. Returns (score, matched_keywords).
+    
+    For national subreddits without a Colorado mention, score is capped at 6
+    (they can't be served by a CO-only contractor).
+    """
     text_lower = text.lower()
     matches = []
     for keyword, weight in KEYWORDS.items():
@@ -99,6 +130,10 @@ def score_text(text):
     if location:
         score += LOCATION_SCORE_BOOST
         matches.append((f"📍 {location}", LOCATION_SCORE_BOOST))
+    elif subreddit and subreddit not in LOCAL_SUBREDDITS:
+        # National sub, no Colorado mention — cap score (can't serve them)
+        score = min(score, 6)
+        matches.append(("⚠️ no CO location", 0))
     
     return min(score, 10), matches
 
@@ -151,11 +186,15 @@ def process_post(post_data, subreddit):
     if author in ("[deleted]", "AutoModerator"):
         return 0
 
+    # Skip obviously irrelevant posts
+    if _hits_negative_keyword(text.lower()):
+        return 0
+
     # Skip posts in local subreddits that aren't about remodeling
     if not _passes_local_filter(text, subreddit):
         return 0
 
-    score, matches = score_text(text)
+    score, matches = score_text(text, subreddit)
     if score >= MIN_SCORE_THRESHOLD:
         url = f"https://reddit.com{permalink}"
         ts = datetime.fromtimestamp(created, tz=timezone.utc).isoformat()
@@ -182,11 +221,15 @@ def process_comment(comment_data, subreddit):
     if author in ("[deleted]", "AutoModerator"):
         return 0
 
+    # Skip obviously irrelevant comments
+    if _hits_negative_keyword(body.lower()):
+        return 0
+
     # Skip comments in local subreddits that aren't about remodeling
     if not _passes_local_filter(body, subreddit):
         return 0
 
-    score, matches = score_text(body)
+    score, matches = score_text(body, subreddit)
     if score >= MIN_SCORE_THRESHOLD:
         url = f"https://reddit.com{permalink}"
         ts = datetime.fromtimestamp(created, tz=timezone.utc).isoformat()
