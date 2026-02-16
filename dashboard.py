@@ -903,33 +903,38 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
 
 <div class="page cover">
   <h1>Social Prospector Platform</h1>
-  <div class="sub">AI-Powered Precious Metals Buyer Discovery</div>
+  <div class="sub">AI-Powered Lead Intelligence for Local Businesses</div>
   <div class="company">Presentation for {{ company_name }}</div>
 </div>
 
 <div class="page">
   <h2>The Problem</h2>
   <ul>
-    <li><strong>Expensive lead generation</strong> — traditional methods cost $50-200+ per lead</li>
-    <li><strong>Low quality leads</strong> — most have no real buying intent</li>
-    <li><strong>Duplicate contacts</strong> — paying for the same prospects across channels</li>
-    <li><strong>Wrong targets</strong> — broad advertising reaches uninterested audiences</li>
-    <li><strong>Slow response times</strong> — by the time you find a buyer, they've already purchased</li>
+    <li><strong>Expensive lead generation</strong> — traditional ads cost $50-200+ per lead with no guarantee of intent</li>
+    <li><strong>Wrong timing</strong> — by the time your ad reaches someone, they may have already hired a competitor</li>
+    <li><strong>No intent signal</strong> — Facebook/Google ads blast everyone, not just people actively looking for your service</li>
+    <li><strong>Wasted budget</strong> — most ad spend reaches people who aren't ready to buy</li>
+    <li><strong>Invisible conversations</strong> — people are posting RIGHT NOW about needing your services, and you're missing them</li>
   </ul>
 
   <h2>The Solution</h2>
-  <p>AI-powered social media monitoring that finds <strong>real buyers</strong> actively discussing precious metals purchases — scored by intent level for prioritized outreach.</p>
+  <p><strong>A daily intelligence dashboard</strong> that shows your sales team exactly who posted TODAY about needing your services — across Reddit, Craigslist, Facebook Groups, and web forums. Scored by buying intent, filtered by your service area. Your team sees it every morning and responds first.</p>
 
   <h2>How It Works</h2>
   <div class="flow">
-    <div class="step">🔍 Scanner<br><small>Monitor platforms 24/7</small></div>
+    <div class="step">🔍 Scanner<br><small>Monitor 5+ platforms 24/7</small></div>
+    <div class="arrow">→</div>
+    <div class="step">📍 Filter<br><small>Your area only</small></div>
     <div class="arrow">→</div>
     <div class="step">🎯 Score<br><small>AI intent scoring 1-10</small></div>
     <div class="arrow">→</div>
-    <div class="step">📋 Queue<br><small>Review & approve</small></div>
+    <div class="step">📋 Dashboard<br><small>Your team reviews daily</small></div>
     <div class="arrow">→</div>
-    <div class="step">💰 Convert<br><small>Engage & close</small></div>
+    <div class="step">💰 Close<br><small>First to respond wins</small></div>
   </div>
+
+  <h3 style="margin-top:30px;color:#daa520">Why "First to Respond" Matters</h3>
+  <p>Studies show that <strong>78% of customers buy from the first business to respond</strong>. When someone posts "looking for a contractor in Denver" — the company that replies within hours (not days) gets the job. This platform makes sure that company is yours.</p>
 </div>
 
 <div class="page">
@@ -966,7 +971,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   <table>
     <tr><th>Platform</th><th>Status</th><th>Description</th></tr>
     <tr><td>Reddit</td><td>✅ Live</td><td>19 subreddits (9 Colorado + 10 national), real-time monitoring</td></tr>
-    <tr><td>Craigslist</td><td>✅ Live</td><td>7 Colorado regions via RSS feeds — housing, services, gigs</td></tr>
+    <tr><td>Craigslist</td><td>✅ Live</td><td>7 Colorado regions — Denver, CO Springs, Boulder, Fort Collins, and more</td></tr>
     <tr><td>Facebook</td><td>✅ Live</td><td>Colorado home improvement groups (Apify or Google fallback)</td></tr>
     <tr><td>Web Forums</td><td>✅ Live</td><td>Houzz, Contractor Talk, DIY Chat Room, and more</td></tr>
     <tr><td>YouTube</td><td>🟡 Ready</td><td>Comment scanning on remodeling videos (needs API key)</td></tr>
@@ -997,7 +1002,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
         <li>❌ Competitor monitoring</li>
         <li>❌ Reply automation</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#666">For dealers getting started with digital leads</div>
+      <div style="margin-top:16px;font-size:12px;color:#666">For businesses getting started with intent-based leads</div>
     </div>
     <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;background:#1a1200;position:relative">
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#daa520;color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MOST POPULAR</div>
@@ -1014,7 +1019,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
         <li>✅ Priority support</li>
         <li>❌ X/Twitter & YouTube</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#b8860b">For serious dealers ready to dominate lead gen</div>
+      <div style="margin-top:16px;font-size:12px;color:#b8860b">For businesses ready to dominate local lead gen</div>
     </div>
     <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f">
       <div style="font-size:14px;color:#b9f2ff;text-transform:uppercase;letter-spacing:2px">💎 Platinum</div>
@@ -1030,7 +1035,7 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
         <li>✅ API access</li>
         <li>✅ White-label option</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#7ac8db">For top dealers who want every advantage</div>
+      <div style="margin-top:16px;font-size:12px;color:#7ac8db">For top businesses who want every advantage</div>
     </div>
   </div>
   <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include a $500 one-time setup fee · Annual billing saves 2 months · $1 first-week trial available</p>
