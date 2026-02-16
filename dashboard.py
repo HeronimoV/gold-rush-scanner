@@ -989,58 +989,49 @@ PITCH_TEMPLATE = """<!DOCTYPE html>
   <h2>Pricing</h2>
   <div style="display:flex;gap:24px;flex-wrap:wrap;justify-content:center;margin:20px 0">
     <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #888;border-radius:12px;padding:24px;text-align:center;background:#1a1a1a">
-      <div style="font-size:14px;color:#888;text-transform:uppercase;letter-spacing:2px">🥉 Silver</div>
-      <div style="font-size:42px;font-weight:800;color:#c0c0c0;margin:12px 0">$999<span style="font-size:16px;color:#888">/mo</span></div>
-      <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
-        <li>✅ Daily intelligence dashboard</li>
-        <li>✅ Reddit + Craigslist scanning</li>
-        <li>✅ AI intent scoring (1-10)</li>
-        <li>✅ Geographic filtering to your area</li>
-        <li>✅ Email alerts for hot leads (8+)</li>
-        <li>✅ CSV export</li>
-        <li>✅ Scans every 2 hours</li>
-        <li>❌ Facebook & web forum scanning</li>
-        <li>❌ Competitor monitoring</li>
-        <li>❌ Reply templates</li>
-      </ul>
-      <div style="margin-top:16px;font-size:12px;color:#666">See who needs your services today — respond first</div>
-    </div>
-    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;background:#1a1200;position:relative">
-      <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:#daa520;color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MOST POPULAR</div>
       <div style="font-size:14px;color:#daa520;text-transform:uppercase;letter-spacing:2px">🥇 Gold</div>
       <div style="font-size:42px;font-weight:800;color:#daa520;margin:12px 0">$1,999<span style="font-size:16px;color:#888">/mo</span></div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
-        <li>✅ Everything in Silver</li>
+        <li>✅ Daily intelligence dashboard</li>
         <li>✅ All 5 platforms (Reddit, CL, FB, forums, YouTube)</li>
+        <li>✅ AI intent scoring & geographic filtering</li>
         <li>✅ Competitor complaint detection</li>
         <li>✅ AI reply templates (review & post)</li>
-        <li>✅ Branded landing page</li>
+        <li>✅ Branded landing page + lead capture</li>
         <li>✅ Full analytics dashboard</li>
+        <li>✅ Email alerts for hot leads (8+)</li>
         <li>✅ Weekly performance reports</li>
-        <li>✅ Priority support</li>
-        <li>❌ Exclusive territory</li>
+        <li>✅ Scans every 2 hours, 24/7</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#b8860b">Full platform access — see everything, respond to everything</div>
+      <div style="margin-top:16px;font-size:12px;color:#b8860b">Full platform access — see every opportunity, respond first</div>
     </div>
-    <div style="flex:1;min-width:220px;max-width:300px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f;position:relative">
+    <div style="flex:1;min-width:220px;max-width:340px;border:2px solid #b9f2ff;border-radius:12px;padding:24px;text-align:center;background:#0a1a1f;position:relative">
       <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(90deg,#b9f2ff,#daa520);color:#000;padding:2px 16px;border-radius:20px;font-size:11px;font-weight:700">MAX ROI</div>
       <div style="font-size:14px;color:#b9f2ff;text-transform:uppercase;letter-spacing:2px">💎 Platinum</div>
       <div style="font-size:42px;font-weight:800;color:#b9f2ff;margin:12px 0">$4,999<span style="font-size:16px;color:#888">/mo</span></div>
       <ul style="text-align:left;list-style:none;padding:0;font-size:13px;color:#ccc;line-height:2">
         <li>✅ Everything in Gold</li>
-        <li>🔒 <strong>Exclusive territory</strong> — YOUR city, no competitors</li>
+        <li>🔒 <strong>Exclusive to your specialty</strong> in your city</li>
+        <li style="font-size:12px;color:#999;padding-left:20px">Only ONE kitchen remodeler per city. Only ONE roofer. Only ONE painter.</li>
+        <li>✅ Leads filtered to YOUR trade only</li>
         <li>✅ Custom keyword tuning for your specialty</li>
         <li>✅ Dedicated account manager</li>
         <li>✅ Monthly strategy call</li>
         <li>✅ Custom branded dashboard (your logo, colors)</li>
         <li>✅ CRM integration (leads pushed to your system)</li>
-        <li>✅ Priority lead alerts (SMS/Slack/email)</li>
+        <li>✅ Priority alerts (SMS + email)</li>
         <li>✅ Quarterly ROI review</li>
       </ul>
-      <div style="margin-top:16px;font-size:12px;color:#7ac8db">Lock out your competition — only YOU see these leads in your area</div>
+      <div style="margin-top:16px;font-size:12px;color:#7ac8db">Your specialty, your city, your leads — nobody else gets them</div>
     </div>
   </div>
-  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include onboarding & setup · Annual billing saves 2 months · 7-day money-back guarantee</p>
+  <div style="background:#1a1200;border:2px solid #daa520;border-radius:12px;padding:24px;text-align:center;margin:30px auto;max-width:700px">
+    <div style="font-size:20px;font-weight:800;color:#daa520;margin-bottom:8px">🔥 14-Day Free Trial — Zero Risk</div>
+    <p style="font-size:15px;color:#ccc;margin-bottom:8px">Try the full platform free for 2 weeks. We only make money if you do.</p>
+    <p style="font-size:14px;color:#999;margin-bottom:4px"><strong style="color:#daa520">10% revenue share</strong> on leads that close during your trial — that's it.</p>
+    <p style="font-size:13px;color:#888">No credit card upfront. No commitment. If it works, upgrade to a plan. If not, walk away.</p>
+  </div>
+  <p style="text-align:center;font-size:13px;color:#888;margin-top:8px">All plans include onboarding & setup · Annual billing saves 2 months</p>
 
   <h2 style="margin-top:40px">Enterprise Licensing — Own It Outright</h2>
   <p style="text-align:center;color:#999;margin-bottom:20px;font-size:14px">Want full ownership instead of a monthly subscription? We'll build it, brand it, deploy it, and hand you the keys.</p>
