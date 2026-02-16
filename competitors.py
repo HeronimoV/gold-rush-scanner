@@ -172,8 +172,16 @@ def run_competitor_scan():
     log.info("Starting competitor complaint scan...")
     log.info(f"Monitoring {len(COMPETITORS)} competitors across {len(SUBREDDITS)} subreddits")
 
+    # Only scan the most relevant subreddits for competitor mentions (not all)
+    try:
+        from config import LOCAL_SUBREDDITS
+        comp_subs = LOCAL_SUBREDDITS + ["HomeImprovement", "homeowners", "Renovations", "centuryhomes"]
+    except ImportError:
+        comp_subs = SUBREDDITS[:8]  # limit to first 8
+    
+    log.info(f"Monitoring {len(COMPETITORS)} competitors across {len(comp_subs)} subreddits")
     total = 0
-    for sub in SUBREDDITS:
+    for sub in comp_subs:
         log.info(f"  Scanning r/{sub} for competitor mentions...")
         found = search_subreddit_competitors(sub)
         total += found

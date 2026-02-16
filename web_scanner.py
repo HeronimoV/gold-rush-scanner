@@ -7,7 +7,10 @@ import requests
 from datetime import datetime, timezone
 from urllib.parse import urlparse
 
-from bs4 import BeautifulSoup
+try:
+    from bs4 import BeautifulSoup
+except ImportError:
+    BeautifulSoup = None
 
 from config import KEYWORDS, MIN_SCORE_THRESHOLD, USER_AGENT, REQUEST_DELAY
 from db import insert_lead
@@ -80,7 +83,23 @@ def _score_text(text):
 
 def search_google_scrape(query, num_results=20):
     """Scrape Google search results (fallback, no API key needed)."""
+    import re as _re
     results = []
+    if BeautifulSoup is None:
+        # Fallback: use regex to parse Google results
+        url = f"https://www.google.com/search?q={requests.utils.quote(query)}&num={num_results}&hl=en"
+        try:
+            resp = session.get(url, timeout=15)
+            if resp.status_code == 200:
+                links = _re.findall(r'href="(https?://(?!www\.google)[^"]+)"', resp.text)
+                titles = _re.findall(r'<h3[^>]*>(.*?)</h3>', resp.text)
+                for i, href in enumerate(links[:num_results]):
+                    title = _re.sub(r'<[^>]+>', '', titles[i]).strip() if i < len(titles) else ""
+                    results.append({"url": href, "title": title, "snippet": ""})
+        except Exception as e:
+            log.warning(f"Google search error: {e}")
+        return results
+    
     url = "https://www.google.com/search"
     params = {"q": query, "num": num_results, "hl": "en"}
     try:

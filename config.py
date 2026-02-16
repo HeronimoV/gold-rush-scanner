@@ -14,18 +14,14 @@ SUBREDDITS = [
     "Longmont",
     # National remodeling subreddits
     "HomeImprovement",
-    "HomeRenovation",
-    "Remodeling",
     "InteriorDesign",
     "kitchenremodel",
-    "BathroomRemodel",
     "DIY",
     "homeowners",
     "RealEstate",
     "firsttimehomebuyer",
     "centuryhomes",
     "Renovations",
-    "Contractors",
 ]
 
 # Local subreddits — require strict keyword match (remodeling-related only)
