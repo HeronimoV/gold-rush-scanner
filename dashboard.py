@@ -29,13 +29,13 @@ app = Flask(__name__)
 _scan_status = {"running": False, "last_run": None, "last_count": 0}
 _scan_logs = []  # capture last scan's log output
 
-class _LogCapture(logging.Handler):
+import logging as _logging
+
+class _LogCapture(_logging.Handler):
     def emit(self, record):
         _scan_logs.append(self.format(record))
         if len(_scan_logs) > 200:
             _scan_logs.pop(0)
-
-import logging as _logging
 _log_capture = _LogCapture()
 _log_capture.setFormatter(_logging.Formatter("%(asctime)s [%(name)s] %(message)s", datefmt="%H:%M:%S"))
 _logging.getLogger("scanner").addHandler(_log_capture)
