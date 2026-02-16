@@ -17,30 +17,29 @@ log = logging.getLogger("web_scanner")
 
 # Search queries for finding gold/silver buying discussions
 SEARCH_QUERIES = [
-    '"looking to buy gold" site:forum',
-    '"best gold dealer" forum',
-    '"where to buy silver bars"',
-    '"gold investment advice" forum',
-    '"buying precious metals for first time"',
-    '"gold dealer review"',
-    '"silver stacking beginner"',
-    '"best place to buy gold" forum',
-    '"gold coins" beginner buying',
-    '"silver bars" recommend dealer',
+    '"looking for a contractor" remodel',
+    '"need a remodeler" kitchen bathroom',
+    '"recommend a contractor" renovation',
+    '"how to find a good contractor" remodel',
+    '"kitchen remodel" looking for contractor',
+    '"bathroom remodel" recommend',
+    '"high end finishes" contractor',
+    '"luxury remodel" contractor recommendations',
+    '"whole house renovation" hiring contractor',
+    '"getting quotes" remodel contractor',
 ]
 
 # Known forums to target
 KNOWN_FORUMS = {
-    "kitco.com": "Kitco Forums",
-    "kitcomm.com": "Kitco Forums",
-    "goldstackforums.com": "Gold Stack Forums",
-    "coincommunity.com": "Coin Community",
-    "silverstackers.com": "SilverStackers",
-    "thegoldforum.com": "The Gold Forum",
-    "cointalk.com": "CoinTalk",
-    "bullionstar.com": "BullionStar",
-    "goldismoney2.com": "Gold Is Money",
-    "metalmarkup.com": "Metal Markup",
+    "houzz.com": "Houzz Forums",
+    "diychatroom.com": "DIY Chat Room",
+    "contractortalk.com": "Contractor Talk",
+    "johnbridge.com": "John Bridge Tile Forum",
+    "doityourself.com": "DoItYourself",
+    "gardenweb.com": "Garden Web / Houzz",
+    "thisoldhouse.com": "This Old House",
+    "finehomebuilding.com": "Fine Home Building",
+    "remodeling.hw.net": "Remodeling Magazine",
 }
 
 session = requests.Session()

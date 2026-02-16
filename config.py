@@ -1,84 +1,120 @@
-"""Configuration for Gold/Silver Lead Scanner."""
+"""Configuration for Social Prospector — Home Remodeling & High-End Finishes."""
 
 # Subreddits to monitor
 SUBREDDITS = [
-    "Gold",
-    "Silverbugs",
-    "WallStreetSilver",
-    "investing",
-    "coins",
-    "Bullion",
-    "PreciousMetals",
-    "personalfinance",
-    "Pmsforsale",
-    "goldbugs",
-    "StackSilver",
+    "HomeImprovement",
+    "HomeRenovation",
+    "Remodeling",
+    "InteriorDesign",
+    "kitchenremodel",
+    "BathroomRemodel",
+    "DIY",
+    "homeowners",
+    "RealEstate",
+    "firsttimehomebuyer",
+    "centuryhomes",
+    "Renovations",
+    "Contractors",
 ]
 
 # Keywords and their base intent weights (1-10)
 # Higher weight = stronger buying intent
 KEYWORDS = {
-    # High intent (8-10): actively looking to buy
-    "where to buy": 9,
-    "best place to buy gold": 10,
-    "best place to buy silver": 10,
-    "first gold purchase": 9,
-    "first silver purchase": 9,
-    "recommend a dealer": 9,
-    "trusted dealer": 9,
-    "gold dealer": 8,
-    "silver dealer": 8,
-    "precious metals dealer": 8,
-    "looking to buy": 9,
-    "want to start stacking": 9,
-    "where can i buy": 9,
-    "how to buy gold": 8,
-    "how to buy silver": 8,
-    "should i buy gold": 8,
-    "should i buy silver": 8,
-    "thinking about buying": 8,
-    "just bought my first": 8,
-    "started collecting": 7,
-    "best online dealer": 9,
-    "cheapest gold": 8,
-    "cheapest silver": 8,
-    # Medium-high intent (6-7): considering buying
-    "buying gold": 7,
-    "buying silver": 7,
-    "invest in gold": 7,
-    "invest in silver": 7,
-    "gold bars": 6,
-    "gold coins": 6,
-    "silver bars": 6,
-    "silver coins": 6,
-    "new to gold": 7,
-    "new to silver": 7,
-    "beginner gold": 7,
-    "beginner silver": 7,
-    "stack silver": 7,
-    "stack gold": 7,
-    "gold bullion": 6,
-    "silver bullion": 6,
-    "gold bar": 6,
-    "silver bar": 6,
-    "1 oz gold": 7,
-    "1 oz silver": 7,
-    "gold ira": 8,
-    "silver ira": 8,
-    "gold etf vs physical": 7,
-    # Dealer mentions (6-7): researching specific dealers
-    "apmex": 6,
-    "jm bullion": 7,
-    "sd bullion": 7,
-    "money metals": 7,
-    "local coin shop": 7,
-    "lcs": 5,
+    # High intent (8-10): actively looking for a contractor/remodeler
+    "looking for a contractor": 10,
+    "need a contractor": 10,
+    "recommend a contractor": 10,
+    "looking for a remodeler": 10,
+    "need a remodeler": 10,
+    "recommend a remodeler": 10,
+    "who did your remodel": 9,
+    "looking for someone to": 9,
+    "need someone to remodel": 10,
+    "want to remodel": 9,
+    "planning a remodel": 9,
+    "planning to renovate": 9,
+    "getting quotes": 9,
+    "getting estimates": 9,
+    "getting bids": 9,
+    "how to find a good contractor": 9,
+    "best contractor": 9,
+    "trusted contractor": 9,
+    "reputable contractor": 9,
+    "hire a contractor": 9,
+    "hiring a contractor": 9,
+    "looking for recommendations": 8,
+    "any recommendations for": 8,
+    "can anyone recommend": 8,
+    "who would you recommend": 8,
+    "about to start a renovation": 9,
+    "starting a kitchen remodel": 10,
+    "starting a bathroom remodel": 10,
+    "want to redo my kitchen": 9,
+    "want to redo my bathroom": 9,
+    "thinking about remodeling": 8,
+    "thinking about renovating": 8,
+    "ready to renovate": 9,
+    "budget for remodel": 8,
+    "cost to remodel": 8,
+    "how much does it cost to remodel": 8,
+    "how much to renovate": 8,
+    "remodel estimate": 8,
+    # Medium-high intent (6-7): researching/considering
+    "kitchen remodel": 7,
+    "bathroom remodel": 7,
+    "basement remodel": 7,
+    "home renovation": 6,
+    "house renovation": 6,
+    "whole house remodel": 8,
+    "gut renovation": 8,
+    "high end finishes": 9,
+    "luxury remodel": 9,
+    "custom cabinets": 7,
+    "quartz countertops": 7,
+    "granite countertops": 7,
+    "marble countertops": 8,
+    "hardwood floors": 6,
+    "tile installation": 6,
+    "custom tile": 7,
+    "walk in shower": 7,
+    "master bathroom": 6,
+    "master bath remodel": 8,
+    "open concept": 6,
+    "knock down a wall": 7,
+    "new countertops": 7,
+    "new cabinets": 7,
+    "backsplash": 6,
+    "crown molding": 6,
+    "wainscoting": 7,
+    "custom built ins": 7,
+    "home addition": 7,
+    "room addition": 7,
+    "finished basement": 7,
+    "outdoor kitchen": 7,
+    "deck build": 6,
+    "patio remodel": 6,
+    # Competitor/referral signals (6-7)
+    "bad contractor": 8,
+    "contractor ghosted": 9,
+    "contractor screwed": 9,
+    "terrible contractor": 9,
+    "worst contractor": 9,
+    "contractor nightmare": 9,
+    "fired my contractor": 9,
+    "need to find a new contractor": 10,
+    "home depot": 5,
+    "lowes": 5,
+    "angi": 6,
+    "angie's list": 6,
+    "thumbtack": 6,
+    "houzz": 6,
+    "homeadvisor": 6,
     # Lower intent (3-5): general discussion
-    "gold price": 4,
-    "silver price": 4,
-    "precious metals": 3,
-    "gold market": 3,
-    "silver market": 3,
+    "before and after": 4,
+    "remodel ideas": 5,
+    "renovation ideas": 5,
+    "design ideas": 4,
+    "inspiration": 3,
 }
 
 # Minimum intent score to save a lead
@@ -89,7 +125,7 @@ DB_PATH = "leads.db"
 
 # Reddit JSON API settings
 REDDIT_BASE_URL = "https://www.reddit.com"
-USER_AGENT = "GoldRushScanner/2.0 (Lead Research Tool)"
+USER_AGENT = "SocialProspector/2.0 (Lead Research Tool)"
 REQUEST_DELAY = 2  # seconds between requests to be polite
 
 # Dashboard settings
@@ -97,19 +133,18 @@ DASHBOARD_HOST = "0.0.0.0"
 DASHBOARD_PORT = 5000
 
 # YouTube Data API v3 key (free — https://console.cloud.google.com/apis/credentials)
-# Set to your API key string to enable YouTube scanning, or leave None to skip
 YOUTUBE_API_KEY = None
 
 # YouTube search queries
 YOUTUBE_SEARCH_QUERIES = [
-    "buying gold for beginners",
-    "how to buy gold",
-    "silver stacking",
-    "gold investing 2025",
-    "best gold dealers",
-    "gold vs silver investment",
-    "gold IRA",
-    "physical gold buying guide",
+    "kitchen remodel before and after",
+    "bathroom remodel ideas",
+    "how to find a good contractor",
+    "home renovation tips",
+    "luxury kitchen remodel",
+    "high end bathroom finishes",
+    "whole house renovation",
+    "hiring a contractor tips",
 ]
 
 # Scheduler
@@ -120,7 +155,7 @@ SMTP_HOST = None
 SMTP_PORT = 587
 SMTP_USER = None
 SMTP_PASS = None
-NOTIFY_EMAIL = None  # recipient for alerts
+NOTIFY_EMAIL = None
 
 # Webhook notifications (Slack/Discord)
 WEBHOOK_URL = None

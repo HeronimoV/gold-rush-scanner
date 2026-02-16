@@ -12,13 +12,19 @@ def generate_reply(username, content, subreddit, score):
     content_lower = content.lower()
     
     # Detect topic
-    topic = "precious metals"
-    if "silver" in content_lower and "gold" not in content_lower:
-        topic = "silver"
-    elif "gold" in content_lower and "silver" not in content_lower:
-        topic = "gold"
-    elif "ira" in content_lower:
-        topic = "precious metals IRA"
+    topic = "home remodel"
+    if "kitchen" in content_lower:
+        topic = "kitchen remodel"
+    elif "bathroom" in content_lower or "bath" in content_lower:
+        topic = "bathroom remodel"
+    elif "basement" in content_lower:
+        topic = "basement remodel"
+    elif "addition" in content_lower:
+        topic = "home addition"
+    elif "outdoor" in content_lower or "deck" in content_lower or "patio" in content_lower:
+        topic = "outdoor renovation"
+    elif "contractor" in content_lower:
+        topic = "finding a contractor"
     
     if score >= 8:
         return random.choice(_high_intent_templates(username, topic, subreddit))
@@ -30,35 +36,35 @@ def generate_reply(username, content, subreddit, score):
 
 def _high_intent_templates(username, topic, subreddit):
     return [
-        f"Hey! I've been in the {topic} space for a while and totally get the research paralysis when picking a dealer. A few things I always look for: transparent pricing over spot, insured shipping, and a solid buyback program.\n\nI've had a really good experience with [Company Name] — their premiums are competitive and customer service has been great. Worth checking out: [LANDING_URL]\n\nHappy to answer any questions if you're still deciding!",
+        f"Hey! I totally get the stress of finding the right contractor for a {topic}. A few things I always recommend:\n\n1. Get at least 3 quotes\n2. Check references AND go see their past work in person\n3. Make sure they're licensed, insured, and pull permits\n4. Never pay more than 10-15% upfront\n\nI had a great experience with [Company Name] — they specialize in high-end finishes and their work speaks for itself. Worth getting a free estimate: [LANDING_URL]\n\nGood luck with your project!",
 
-        f"Great question — choosing a reliable dealer is honestly the most important first step. I'd recommend comparing a few before committing.\n\nOne I keep coming back to is [Company Name]. They're straightforward on pricing and I've never had a shipping issue. Here's their site if you want to take a look: [LANDING_URL]\n\nGood luck with your {topic} journey!",
+        f"Great question — choosing the right contractor is honestly the most important decision you'll make on a {topic}. The wrong one can cost you double in fixes.\n\nOne team I keep recommending is [Company Name]. They focus on quality finishes and they're super transparent on pricing — no surprise change orders. Check them out: [LANDING_URL]\n\nHappy to share more tips if you need them!",
 
-        f"Welcome to the {topic} world! Since you're ready to pull the trigger, here's my quick advice:\n\n1. Always compare premiums over spot price\n2. Check for free/insured shipping thresholds\n3. Look for dealers with buyback guarantees\n\n[Company Name] checks all those boxes for me — [LANDING_URL]. Let me know if you have any other questions!",
+        f"Been through a {topic} myself and learned a LOT the hard way. Here's my advice:\n\n- Get everything in writing before work starts\n- A detailed scope of work saves headaches later\n- Don't pick the cheapest bid — pick the most detailed one\n\n[Company Name] was really thorough with their estimate and the final result was amazing. Here's their site if you want a quote: [LANDING_URL]",
 
-        f"I was in the exact same spot not long ago. After trying a few dealers, I settled on [Company Name] for most of my purchases. Fair prices, fast shipping, and they actually pick up the phone if you call.\n\nHere's a link if you want to browse: [LANDING_URL]\n\nDon't overthink it too much — the best time to start is now. 🪙",
+        f"I was in the exact same spot last year looking for someone to do a {topic}. After getting burned by one contractor, I found [Company Name] and they completely turned the project around. Quality finishes, on schedule, fair pricing.\n\nHighly recommend at least getting a free estimate: [LANDING_URL]\n\nDon't settle — your home deserves the best!",
     ]
 
 
 def _medium_intent_templates(username, topic, subreddit):
     return [
-        f"Solid thinking on looking into {topic}! A few things worth considering as you research:\n\n- Physical vs ETF depends on your goals (wealth preservation vs trading)\n- If going physical, dealer reputation matters a LOT\n- Start small and learn the market before going big\n\nI've been using [Company Name] and they've been solid for both beginners and experienced stackers. Might be worth a look: [LANDING_URL]",
+        f"Solid thinking on the {topic}! A few things worth considering before you start:\n\n- Set your budget and add 15-20% for unexpected things (there are ALWAYS surprises)\n- Decide what's non-negotiable vs nice-to-have\n- Get recommendations from people who've actually used the contractor\n\nI've been really impressed with the work [Company Name] does — they specialize in high-end finishes and custom work. Might be worth a look: [LANDING_URL]",
 
-        f"Nice to see more people exploring {topic}! The learning curve isn't as steep as it seems.\n\nMy suggestion: start with well-known bullion products (Eagles, Maples, generic bars) before getting into numismatics. And find a dealer you trust — it makes everything easier.\n\n[Company Name] has a good selection and their educational resources helped me when I was starting out: [LANDING_URL]",
+        f"Nice to see someone doing their homework before diving into a {topic}! The planning phase is honestly the most important part.\n\nMy suggestion: don't just look at photos — go see a contractor's finished work in person. It tells you everything about their attention to detail.\n\n[Company Name] does beautiful custom work and they're happy to show you past projects: [LANDING_URL]",
 
-        f"Good move researching {topic} — especially in the current market. One thing I wish someone told me early on: don't just chase the lowest premium. Dealer reliability, shipping speed, and buyback policies matter just as much.\n\nI've had consistently good experiences with [Company Name] if you're looking for recommendations: [LANDING_URL]",
+        f"A {topic} is a big investment but it adds serious value to your home when done right. One thing I wish someone told me: spending a bit more on quality materials and finishes pays off hugely in both looks and durability.\n\n[Company Name] focuses specifically on premium finishes — worth checking out if quality is a priority for you: [LANDING_URL]",
 
-        f"The {topic} market can seem overwhelming at first, but it gets simpler once you understand premiums and spot prices. r/{subreddit} is a great place to learn!\n\nWhen you're ready to make a move, I'd suggest checking out [Company Name]. They're transparent on pricing and have a good reputation in the community: [LANDING_URL]",
+        f"The {topic} world can seem overwhelming at first — so many options and price ranges. r/{subreddit} is a great place to research!\n\nWhen you're ready to get serious about it, I'd suggest getting a few professional estimates. [Company Name] does free consultations and they're really knowledgeable about high-end options: [LANDING_URL]",
     ]
 
 
 def _low_intent_templates(username, topic, subreddit):
     return [
-        f"Interesting discussion! For anyone curious about actually getting into physical {topic}, it's more accessible than most people think. The key is understanding the difference between spot price and what you actually pay (the premium).\n\nIf you ever want to explore further, [Company Name] has some solid educational content on their site: [LANDING_URL]",
+        f"Interesting discussion! For anyone thinking about a {topic}, it's worth knowing that the quality of your contractor matters way more than the materials you pick. A great installer can make mid-range materials look premium, but a bad one can ruin expensive ones.\n\nIf you're exploring options, [Company Name] has some great examples of their finish work on their site: [LANDING_URL]",
 
-        f"Good points in this thread. For those wondering about the practical side of {topic} investing — physical ownership has some unique advantages that paper instruments don't offer (no counterparty risk, privacy, tangible asset).\n\nI found [Company Name]'s guides pretty helpful when I was learning the basics: [LANDING_URL]",
+        f"Good points in this thread. For those considering a {topic} — the ROI on kitchen and bathroom remodels is typically 70-80% of the cost added to your home value. So it's actually a solid investment if done right.\n\n[Company Name] specializes in the kind of finishes that maximize that return: [LANDING_URL]",
 
-        f"The {topic} market is fascinating right now. If anyone's thinking about dipping their toes in, I'd recommend starting with research on the different product types (bars vs coins, government vs private mint).\n\n[Company Name] has a nice breakdown of options for newcomers: [LANDING_URL]",
+        f"Lots of great ideas here! For anyone on the fence about starting a {topic}, my advice is to at least get a professional consultation. A good contractor can help you understand what's realistic for your budget.\n\n[Company Name] offers free estimates and they're really helpful even if you're just in the planning phase: [LANDING_URL]",
 
-        f"Lots of great perspectives here on {topic}. For anyone on the fence about physical ownership, the barrier to entry is lower than you'd think — you can start with as little as a single ounce.\n\nCheck out [Company Name] if you want to see what's available and at what prices: [LANDING_URL]",
+        f"Love seeing these {topic} discussions! One tip that saved me a ton: invest in the things you touch every day (countertops, cabinet hardware, faucets) and save on things you don't notice as much (underlayment, basic plumbing behind walls).\n\nFor inspiration on high-end finishes, check out [Company Name]'s portfolio: [LANDING_URL]",
     ]
