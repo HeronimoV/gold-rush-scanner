@@ -123,7 +123,23 @@ def score_fb_post(text):
 
 
 def run_apify_scan(api_token):
-    """Scan Facebook groups using Apify's Facebook Groups Scraper actor."""
+    """Scan Facebook groups using Apify's Facebook Groups Scraper actor.
+    Only runs once per day to conserve Apify credits.
+    """
+    import os
+    # Check if we already ran Apify today
+    flag_file = "/tmp/apify_last_run.txt"
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    try:
+        if os.path.exists(flag_file):
+            with open(flag_file) as f:
+                last_run = f.read().strip()
+            if last_run == today:
+                log.info("Apify already ran today — skipping to save credits")
+                return 0
+    except Exception:
+        pass
+
     log.info(f"Scanning {len(CO_FACEBOOK_GROUPS)} Facebook groups via Apify...")
     total = 0
 
@@ -133,8 +149,8 @@ def run_apify_scan(api_token):
 
     payload = {
         "startUrls": [{"url": url} for url in CO_FACEBOOK_GROUPS],
-        "maxPosts": 50,  # per group
-        "maxComments": 10,
+        "maxPosts": 20,  # per group (conserve credits)
+        "maxComments": 5,
         "sortBy": "CHRONOLOGICAL",  # most recent first
     }
 
@@ -233,6 +249,13 @@ def run_apify_scan(api_token):
 
     except Exception as e:
         log.warning(f"  Apify scan error: {e}")
+
+    # Mark today as done so we don't burn more credits
+    try:
+        with open(flag_file, "w") as f:
+            f.write(today)
+    except Exception:
+        pass
 
     return total
 
