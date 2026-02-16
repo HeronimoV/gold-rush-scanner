@@ -72,24 +72,62 @@ session.headers.update({
 })
 
 
+# Seller/advertiser signals — these people are SELLING, not BUYING services
+SELLER_SIGNALS = [
+    "i build", "we build", "i handcraft", "we handcraft",
+    "i make", "we make", "i create", "we create",
+    "custom built", "handmade", "locally built", "locally made",
+    "check out my", "check out our", "visit my", "visit our",
+    "order now", "order yours", "shop now", "dm for price",
+    "free estimate", "free consultation", "call us", "call me",
+    "our services", "my services", "we offer", "i offer",
+    "years of experience", "licensed and insured", "licensed & insured",
+    "serving the", "serving denver", "serving colorado",
+    "www.", ".com", "booking", "book now", "schedule",
+    "for sale", "selling", "jellyfish", "lamp", "aquarium",
+]
+
+# Non-remodeling junk that slips through
+FB_NEGATIVE_KEYWORDS = [
+    "jellyfish", "aquarium", "fish tank", "dining table",
+    "furniture for sale", "couch", "sofa", "mattress",
+    "welcome to this gorgeous home",  # real estate listings
+    "open house", "just listed", "just sold", "under contract",
+    "for rent", "for lease", "apartment available",
+    "roommate", "room for rent",
+]
+
+
 def score_fb_post(text):
-    """Score a Facebook post for remodeling intent."""
+    """Score a Facebook post for remodeling intent.
+    
+    Filters out sellers/advertisers and non-remodeling junk.
+    Only scores people LOOKING FOR remodeling services.
+    """
     text_lower = text.lower()
+
+    # Skip obvious junk
+    if any(neg in text_lower for neg in FB_NEGATIVE_KEYWORDS):
+        return 0, []
+
+    # Skip sellers/advertisers — they're offering services, not looking for them
+    seller_hits = sum(1 for s in SELLER_SIGNALS if s in text_lower)
+    if seller_hits >= 2:
+        return 0, []
+
     matches = []
     for keyword, weight in KEYWORDS.items():
         if keyword in text_lower:
             matches.append((keyword, weight))
 
     if not matches:
-        # Base score for FB posts found via remodel search
-        return 5, [("📘 facebook-CO", 5)]
+        return 0, []  # No keyword match = no lead (removed free base score)
 
     best = max(w for _, w in matches)
     bonus = min(len(matches) - 1, 2)
-    # +2 boost for being local Colorado Facebook group
-    score = min(best + bonus + 2, 10)
+    score = best + bonus
 
-    # Location boost
+    # Location boost (no +2 freebie anymore — earn the score)
     for loc in TARGET_LOCATIONS:
         if loc in text_lower:
             matches.append((f"📍 {loc}", LOCATION_SCORE_BOOST))
@@ -97,7 +135,7 @@ def score_fb_post(text):
             break
 
     matches.append(("📘 facebook", 0))
-    return score, matches
+    return min(score, 10), matches
 
 
 def run_apify_scan(api_token):

@@ -30,10 +30,23 @@ try:
 except ImportError:
     NEGATIVE_KEYWORDS = []
 
+try:
+    from config import SELLER_SIGNALS
+except ImportError:
+    SELLER_SIGNALS = []
+
 
 def _hits_negative_keyword(text_lower):
     """Check if text matches a negative keyword (obvious non-remodeling)."""
     return any(neg in text_lower for neg in NEGATIVE_KEYWORDS)
+
+
+def _is_seller(text_lower):
+    """Check if post is from a seller/advertiser (offering services, not seeking them)."""
+    if not SELLER_SIGNALS:
+        return False
+    hits = sum(1 for s in SELLER_SIGNALS if s in text_lower)
+    return hits >= 2
 
 
 def _passes_local_filter(text, subreddit):
@@ -186,8 +199,14 @@ def process_post(post_data, subreddit):
     if author in ("[deleted]", "AutoModerator"):
         return 0
 
+    text_low = text.lower()
+
     # Skip obviously irrelevant posts
-    if _hits_negative_keyword(text.lower()):
+    if _hits_negative_keyword(text_low):
+        return 0
+
+    # Skip sellers/advertisers
+    if _is_seller(text_low):
         return 0
 
     # Skip posts in local subreddits that aren't about remodeling
@@ -221,8 +240,14 @@ def process_comment(comment_data, subreddit):
     if author in ("[deleted]", "AutoModerator"):
         return 0
 
+    body_low = body.lower()
+
     # Skip obviously irrelevant comments
-    if _hits_negative_keyword(body.lower()):
+    if _hits_negative_keyword(body_low):
+        return 0
+
+    # Skip sellers/advertisers
+    if _is_seller(body_low):
         return 0
 
     # Skip comments in local subreddits that aren't about remodeling

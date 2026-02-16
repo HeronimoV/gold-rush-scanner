@@ -180,6 +180,22 @@ NEGATIVE_KEYWORDS = [
     "lost dog", "lost cat", "missing pet",
     "job posting", "hiring for", "we're hiring",
     "moving to", "moving from",
+    "jellyfish", "aquarium", "fish tank",
+    "welcome to this gorgeous home", "just listed", "just sold",
+    "open house", "under contract", "for rent", "for lease",
+]
+
+# Seller/advertiser signals — skip people OFFERING services (not looking for them)
+# If a post matches 2+ of these, it's a seller, not a lead
+SELLER_SIGNALS = [
+    "i build", "we build", "i handcraft", "we handcraft",
+    "i make", "we make", "locally built", "handmade",
+    "check out my", "check out our", "visit my", "visit our",
+    "free estimate", "free consultation", "call us", "call me",
+    "our services", "my services", "we offer", "i offer",
+    "years of experience", "licensed and insured",
+    "serving the denver", "serving colorado",
+    "dm for price", "order now", "book now",
 ]
 
 # Minimum intent score to save a lead
