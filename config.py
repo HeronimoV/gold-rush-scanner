@@ -2,26 +2,17 @@
 
 # Subreddits to monitor — National + Colorado-specific
 SUBREDDITS = [
-    # Colorado local subreddits
+    # Colorado local subreddits (strict filtering applied)
     "Denver",
     "Colorado",
     "ColoradoSprings",
     "FortCollins",
     "Boulder",
     "AuroraCO",
-    "Lakewood",
     "Pueblo",
     "GrandJunction",
     "Longmont",
-    "Loveland",
-    "Greeley",
-    "Arvada",
-    "Westminster",
-    "Thornton",
-    "Centennial",
-    "Broomfield",
-    "CastleRock",
-    # National (will filter for CO mentions)
+    # National remodeling subreddits
     "HomeImprovement",
     "HomeRenovation",
     "Remodeling",
@@ -35,6 +26,23 @@ SUBREDDITS = [
     "centuryhomes",
     "Renovations",
     "Contractors",
+]
+
+# Local subreddits — require strict keyword match (remodeling-related only)
+LOCAL_SUBREDDITS = [
+    "Denver", "Colorado", "ColoradoSprings", "FortCollins",
+    "Boulder", "AuroraCO", "Pueblo", "GrandJunction", "Longmont",
+]
+
+# Post MUST contain at least one of these terms in local subreddits
+LOCAL_REQUIRED_TERMS = [
+    "remodel", "renovate", "renovation", "contractor", "remodeler",
+    "kitchen", "bathroom", "basement", "flooring", "countertop",
+    "cabinet", "tile", "backsplash", "hardwood", "paint",
+    "drywall", "plumbing", "electrical", "addition", "deck",
+    "patio", "finish", "trim", "molding", "built-in",
+    "handyman", "home improvement", "home repair", "fixer upper",
+    "general contractor", "gc ", "remodeling",
 ]
 
 # Location targeting — Colorado cities and areas

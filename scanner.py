@@ -18,6 +18,20 @@ try:
 except ImportError:
     TARGET_LOCATIONS = []
     LOCATION_SCORE_BOOST = 0
+
+try:
+    from config import LOCAL_SUBREDDITS, LOCAL_REQUIRED_TERMS
+except ImportError:
+    LOCAL_SUBREDDITS = []
+    LOCAL_REQUIRED_TERMS = []
+
+
+def _passes_local_filter(text, subreddit):
+    """For local subreddits, require remodeling-related terms."""
+    if subreddit not in LOCAL_SUBREDDITS:
+        return True  # national subreddits pass through
+    text_lower = text.lower()
+    return any(term in text_lower for term in LOCAL_REQUIRED_TERMS)
 from db import insert_lead, is_lead_queued, add_to_queue, get_connection
 from templates import generate_reply
 
@@ -137,6 +151,10 @@ def process_post(post_data, subreddit):
     if author in ("[deleted]", "AutoModerator"):
         return 0
 
+    # Skip posts in local subreddits that aren't about remodeling
+    if not _passes_local_filter(text, subreddit):
+        return 0
+
     score, matches = score_text(text)
     if score >= MIN_SCORE_THRESHOLD:
         url = f"https://reddit.com{permalink}"
@@ -162,6 +180,10 @@ def process_comment(comment_data, subreddit):
     created = comment_data.get("created_utc", 0)
 
     if author in ("[deleted]", "AutoModerator"):
+        return 0
+
+    # Skip comments in local subreddits that aren't about remodeling
+    if not _passes_local_filter(body, subreddit):
         return 0
 
     score, matches = score_text(body)
