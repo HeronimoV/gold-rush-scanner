@@ -27,6 +27,22 @@ app = Flask(__name__)
 
 # --- Background scanner ---
 _scan_status = {"running": False, "last_run": None, "last_count": 0}
+_scan_logs = []  # capture last scan's log output
+
+class _LogCapture(logging.Handler):
+    def emit(self, record):
+        _scan_logs.append(self.format(record))
+        if len(_scan_logs) > 200:
+            _scan_logs.pop(0)
+
+import logging as _logging
+_log_capture = _LogCapture()
+_log_capture.setFormatter(_logging.Formatter("%(asctime)s [%(name)s] %(message)s", datefmt="%H:%M:%S"))
+_logging.getLogger("scanner").addHandler(_log_capture)
+_logging.getLogger("craigslist").addHandler(_log_capture)
+_logging.getLogger("facebook").addHandler(_log_capture)
+_logging.getLogger("web_scanner").addHandler(_log_capture)
+_logging.getLogger("competitors").addHandler(_log_capture)
 
 def _run_scan_bg():
     """Run scanner in background thread."""
@@ -233,7 +249,7 @@ TEMPLATE = """<!DOCTYPE html>
     <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#d9534f">{{ comp_stats.complaints }}</span>Complaints</div>
     <div class="stat-box" style="background:#2a2d37"><span class="num" style="color:#f0ad4e">{{ comp_stats.mentions }}</span>Mentions</div>
   </div>
-  <p style="color:#999;font-size:13px;margin-bottom:16px">🎯 These are people unhappy with competitors — high-value leads ready to switch. Monitoring: APMEX, JM Bullion, SD Bullion, Money Metals, Goldco, Birch Gold, Augusta Precious Metals, Noble Gold.</p>
+  <p style="color:#999;font-size:13px;margin-bottom:16px">🎯 These are people unhappy with competitors — high-value leads ready to switch.</p>
 {% if comp_leads %}
 <table>
 <thead><tr><th>Score</th><th>User</th><th>Source</th><th>Content</th><th>Found</th><th>Notes</th><th>Status</th><th></th></tr></thead>
@@ -442,6 +458,11 @@ def api_status():
     total = conn.execute("SELECT COUNT(*) FROM leads").fetchone()[0]
     conn.close()
     return {"scan_status": _scan_status, "total_leads": total}
+
+@app.route("/api/logs")
+def api_logs():
+    """Show recent scan logs."""
+    return "<br>".join(_scan_logs[-100:]) if _scan_logs else "No logs yet. Wait for a scan to run."
 
 @app.route("/scan", methods=["POST"])
 def trigger_scan():

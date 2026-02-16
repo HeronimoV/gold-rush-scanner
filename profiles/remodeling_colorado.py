@@ -19,16 +19,18 @@ LOCAL_SUBREDDITS = [
 
 LOCAL_REQUIRED_TERMS = [
     "remodel", "renovate", "renovation", "contractor", "remodeler",
-    "kitchen remodel", "bathroom remodel", "basement remodel",
-    "flooring", "countertop", "cabinet", "backsplash", "hardwood floor",
-    "drywall", "plumbing", "electrical work", "home addition", "deck build",
-    "patio", "molding", "built-in", "handyman",
-    "home improvement", "home repair", "fixer upper", "fixer-upper",
-    "general contractor", "remodeling", "tile install", "tile work",
-    "new kitchen", "new bathroom", "gut reno", "demo day",
-    "knock down wall", "open concept", "new countertop", "new cabinet",
-    "roof repair", "roof replace", "siding", "window replace",
-    "hvac", "furnace", "water heater", "garage conversion",
+    "kitchen", "bathroom", "basement", "flooring", "countertop",
+    "cabinet", "backsplash", "hardwood", "drywall", "plumbing",
+    "electrical", "addition", "deck", "patio", "molding",
+    "built-in", "handyman", "home improvement", "home repair",
+    "fixer upper", "fixer-upper", "general contractor", "remodeling",
+    "tile", "roof", "siding", "window", "door",
+    "hvac", "furnace", "water heater", "garage",
+    "paint", "painter", "painting house", "painting room",
+    "fence", "landscap", "gutter", "insulation",
+    "leak", "repair", "fix", "replace", "install",
+    "upgrade", "redo", "demo", "permit", "quote", "estimate",
+    "sq ft", "square foot", "bid",
 ]
 
 TARGET_LOCATIONS = [
@@ -92,6 +94,22 @@ KEYWORDS = {
     "thumbtack": 6, "houzz": 6, "homeadvisor": 6,
     "before and after": 4, "remodel ideas": 5,
     "renovation ideas": 5, "design ideas": 4, "inspiration": 3,
+    # Broader terms that catch more posts
+    "need help with": 5, "any advice": 4, "what would you do": 4,
+    "how do i fix": 5, "how to fix": 5,
+    "roof leak": 7, "water damage": 7, "foundation": 6,
+    "need a plumber": 8, "need an electrician": 8,
+    "need a painter": 7, "need a roofer": 8,
+    "looking for a plumber": 8, "looking for an electrician": 8,
+    "looking for a painter": 7, "looking for a roofer": 8,
+    "recommend a plumber": 8, "recommend an electrician": 8,
+    "recommend a roofer": 8, "recommend a painter": 7,
+    "fence install": 6, "fence repair": 6,
+    "garage door": 6, "replace windows": 7,
+    "new windows": 7, "new roof": 7, "new flooring": 7,
+    "replace flooring": 7, "painting quote": 7,
+    "repair estimate": 7, "construction": 5,
+    "permit required": 5, "building permit": 5,
 }
 
 NEGATIVE_KEYWORDS = [
