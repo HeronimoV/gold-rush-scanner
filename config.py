@@ -1,253 +1,90 @@
-"""Configuration for Social Prospector — Home Remodeling & High-End Finishes."""
+"""Social Prospector — Dynamic Configuration Loader.
 
-# Subreddits to monitor — National + Colorado-specific
-SUBREDDITS = [
-    # Colorado local subreddits (strict filtering applied)
-    "Denver",
-    "Colorado",
-    "ColoradoSprings",
-    "FortCollins",
-    "Boulder",
-    "AuroraCO",
-    "Pueblo",
-    "GrandJunction",
-    "Longmont",
-    # National remodeling subreddits
-    "HomeImprovement",
-    "InteriorDesign",
-    "kitchenremodel",
-    "DIY",
-    "homeowners",
-    "RealEstate",
-    "firsttimehomebuyer",
-    "centuryhomes",
-    "Renovations",
-]
+Loads industry profile from INDUSTRY_PROFILE env var.
+Set INDUSTRY_PROFILE=remodeling_colorado or INDUSTRY_PROFILE=precious_metals
+Default: remodeling_colorado
 
-# Local subreddits — require strict keyword match (remodeling-related only)
-LOCAL_SUBREDDITS = [
-    "Denver", "Colorado", "ColoradoSprings", "FortCollins",
-    "Boulder", "AuroraCO", "Pueblo", "GrandJunction", "Longmont",
-]
+To add a new industry:
+1. Copy profiles/_template.py to profiles/your_industry.py
+2. Fill in keywords, subreddits, etc.
+3. Set INDUSTRY_PROFILE=your_industry
+4. Deploy — done.
+"""
 
-# Post MUST contain at least one of these terms in local subreddits
-# Keep these specific to remodeling — no generic words like "trim", "paint", "finish"
-LOCAL_REQUIRED_TERMS = [
-    "remodel", "renovate", "renovation", "contractor", "remodeler",
-    "kitchen remodel", "bathroom remodel", "basement remodel",
-    "flooring", "countertop", "cabinet", "backsplash", "hardwood floor",
-    "drywall", "plumbing", "electrical work", "home addition", "deck build",
-    "patio", "molding", "built-in", "handyman",
-    "home improvement", "home repair", "fixer upper", "fixer-upper",
-    "general contractor", "remodeling", "tile install", "tile work",
-    "new kitchen", "new bathroom", "gut reno", "demo day",
-    "knock down wall", "open concept", "new countertop", "new cabinet",
-    "roof repair", "roof replace", "siding", "window replace",
-    "hvac", "furnace", "water heater", "garage conversion",
-]
+import os
+import importlib
 
-# Location targeting — Colorado cities and areas
-# Posts mentioning these get a score boost
-TARGET_LOCATIONS = [
-    "denver", "colorado springs", "aurora", "fort collins", "lakewood",
-    "thornton", "arvada", "westminster", "pueblo", "centennial",
-    "boulder", "greeley", "longmont", "loveland", "broomfield",
-    "castle rock", "parker", "commerce city", "littleton", "northglenn",
-    "brighton", "englewood", "wheat ridge", "golden", "erie",
-    "lafayette", "louisville", "superior", "firestone", "frederick",
-    "dacono", "highlands ranch", "lone tree", "cherry creek",
-    "stapleton", "wash park", "capitol hill", "lodo", "rino",
-    "five points", "park hill", "sloan lake", "congress park",
-    "colorado", "front range", "springs", "co springs",
-    "denvr",  # common misspelling
-]
-LOCATION_SCORE_BOOST = 3  # boost score by this much if location detected
+# --- Load active profile ---
+_profile_name = os.environ.get("INDUSTRY_PROFILE", "remodeling_colorado")
+try:
+    _profile = importlib.import_module(f"profiles.{_profile_name}")
+    print(f"📋 Loaded profile: {getattr(_profile, 'PROFILE_NAME', _profile_name)}")
+except ImportError:
+    print(f"⚠️ Profile '{_profile_name}' not found in profiles/, falling back to remodeling_colorado")
+    _profile = importlib.import_module("profiles.remodeling_colorado")
 
-# Keywords and their base intent weights (1-10)
-# Higher weight = stronger buying intent
-KEYWORDS = {
-    # High intent (8-10): actively looking for a contractor/remodeler
-    "looking for a contractor": 10,
-    "need a contractor": 10,
-    "recommend a contractor": 10,
-    "looking for a remodeler": 10,
-    "need a remodeler": 10,
-    "recommend a remodeler": 10,
-    "who did your remodel": 9,
-    "looking for someone to remodel": 9,
-    "looking for someone to renovate": 9,
-    "looking for someone to build": 8,
-    "looking for someone to install": 8,
-    "need someone to remodel": 10,
-    "want to remodel": 9,
-    "planning a remodel": 9,
-    "planning to renovate": 9,
-    "getting quotes": 9,
-    "getting estimates": 9,
-    "getting bids": 9,
-    "how to find a good contractor": 9,
-    "best contractor": 9,
-    "trusted contractor": 9,
-    "reputable contractor": 9,
-    "hire a contractor": 9,
-    "hiring a contractor": 9,
-    "looking for contractor recommendations": 8,
-    "looking for remodeler recommendations": 8,
-    "any recommendations for contractor": 8,
-    "any recommendations for remodel": 8,
-    "can anyone recommend a contractor": 8,
-    "can anyone recommend a remodeler": 8,
-    "who would you recommend for": 7,
-    "about to start a renovation": 9,
-    "starting a kitchen remodel": 10,
-    "starting a bathroom remodel": 10,
-    "want to redo my kitchen": 9,
-    "want to redo my bathroom": 9,
-    "thinking about remodeling": 8,
-    "thinking about renovating": 8,
-    "ready to renovate": 9,
-    "budget for remodel": 8,
-    "cost to remodel": 8,
-    "how much does it cost to remodel": 8,
-    "how much to renovate": 8,
-    "remodel estimate": 8,
-    # Medium-high intent (6-7): researching/considering
-    "kitchen remodel": 7,
-    "bathroom remodel": 7,
-    "basement remodel": 7,
-    "home renovation": 6,
-    "house renovation": 6,
-    "whole house remodel": 8,
-    "gut renovation": 8,
-    "high end finishes": 9,
-    "luxury remodel": 9,
-    "custom cabinets": 7,
-    "quartz countertops": 7,
-    "granite countertops": 7,
-    "marble countertops": 8,
-    "hardwood floors": 6,
-    "tile installation": 6,
-    "custom tile": 7,
-    "walk in shower": 7,
-    "master bathroom": 6,
-    "master bath remodel": 8,
-    "open concept": 6,
-    "knock down a wall": 7,
-    "new countertops": 7,
-    "new cabinets": 7,
-    "backsplash": 6,
-    "crown molding": 6,
-    "wainscoting": 7,
-    "custom built ins": 7,
-    "home addition": 7,
-    "room addition": 7,
-    "finished basement": 7,
-    "outdoor kitchen": 7,
-    "deck build": 6,
-    "patio remodel": 6,
-    # Competitor/referral signals (6-7)
-    "bad contractor": 8,
-    "contractor ghosted": 9,
-    "contractor screwed": 9,
-    "terrible contractor": 9,
-    "worst contractor": 9,
-    "contractor nightmare": 9,
-    "fired my contractor": 9,
-    "need to find a new contractor": 10,
-    "home depot": 5,
-    "lowes": 5,
-    "angi": 6,
-    "angie's list": 6,
-    "thumbtack": 6,
-    "houzz": 6,
-    "homeadvisor": 6,
-    # Lower intent (3-5): general discussion
-    "before and after": 4,
-    "remodel ideas": 5,
-    "renovation ideas": 5,
-    "design ideas": 4,
-    "inspiration": 3,
-}
+# --- Industry-specific settings (from profile) ---
+SUBREDDITS = getattr(_profile, "SUBREDDITS", [])
+LOCAL_SUBREDDITS = getattr(_profile, "LOCAL_SUBREDDITS", [])
+LOCAL_REQUIRED_TERMS = getattr(_profile, "LOCAL_REQUIRED_TERMS", [])
+TARGET_LOCATIONS = getattr(_profile, "TARGET_LOCATIONS", [])
+LOCATION_SCORE_BOOST = getattr(_profile, "LOCATION_SCORE_BOOST", 0)
+KEYWORDS = getattr(_profile, "KEYWORDS", {})
+NEGATIVE_KEYWORDS = getattr(_profile, "NEGATIVE_KEYWORDS", [])
+SELLER_SIGNALS = getattr(_profile, "SELLER_SIGNALS", [])
 
-# Negative keywords — if post contains these, skip it entirely
-NEGATIVE_KEYWORDS = [
-    "things to do this weekend", "things to do in",
-    "events this week", "weekend events",
-    "hair salon", "hair stylist", "haircut",
-    "restaurant", "brunch", "happy hour",
-    "hiking trail", "camping", "ski",
-    "roommate", "sublease", "take over my lease", "relet",
-    "lost dog", "lost cat", "missing pet",
-    "job posting", "hiring for", "we're hiring",
-    "moving to", "moving from",
-    "jellyfish", "aquarium", "fish tank",
-    "welcome to this gorgeous home", "just listed", "just sold",
-    "open house", "under contract", "for rent", "for lease",
-]
+# Optional profile fields used by other scanners
+PROFILE_COMPETITORS = getattr(_profile, "COMPETITORS", [])
+PROFILE_COMPETITOR_SUBREDDITS = getattr(_profile, "COMPETITOR_SUBREDDITS", [])
+PROFILE_YOUTUBE_QUERIES = getattr(_profile, "YOUTUBE_SEARCH_QUERIES", [])
+PROFILE_WEB_QUERIES = getattr(_profile, "WEB_SEARCH_QUERIES", [])
+PROFILE_CRAIGSLIST_REGIONS = getattr(_profile, "CRAIGSLIST_REGIONS", [])
+PROFILE_FB_GROUPS = getattr(_profile, "FB_GROUPS", [])
+PROFILE_REPLY_TEMPLATES = getattr(_profile, "REPLY_TEMPLATES", {})
+PROFILE_NAME = getattr(_profile, "PROFILE_NAME", _profile_name)
 
-# Seller/advertiser signals — skip people OFFERING services (not looking for them)
-# If a post matches 2+ of these, it's a seller, not a lead
-SELLER_SIGNALS = [
-    "i build", "we build", "i handcraft", "we handcraft",
-    "i make", "we make", "locally built", "handmade",
-    "check out my", "check out our", "visit my", "visit our",
-    "free estimate", "free consultation", "call us", "call me",
-    "our services", "my services", "we offer", "i offer",
-    "years of experience", "licensed and insured",
-    "serving the denver", "serving colorado",
-    "dm for price", "order now", "book now",
-]
-
-# Minimum intent score to save a lead
+# --- Global settings (same for all profiles) ---
 MIN_SCORE_THRESHOLD = 4
-
-# Database path
 DB_PATH = "leads.db"
 
-# Reddit JSON API settings
+# Reddit JSON API
 REDDIT_BASE_URL = "https://www.reddit.com"
 USER_AGENT = "SocialProspector/2.0 (Lead Research Tool)"
-REQUEST_DELAY = 2  # seconds between requests to be polite
+REQUEST_DELAY = 2
 
-# Dashboard settings
+# Dashboard
 DASHBOARD_HOST = "0.0.0.0"
 DASHBOARD_PORT = 5000
 
-# YouTube Data API v3 key (free — https://console.cloud.google.com/apis/credentials)
-YOUTUBE_API_KEY = None
+# YouTube API key
+YOUTUBE_API_KEY = os.environ.get("YOUTUBE_API_KEY", None)
 
-# YouTube search queries
-YOUTUBE_SEARCH_QUERIES = [
+# YouTube search queries (profile overrides if set)
+YOUTUBE_SEARCH_QUERIES = PROFILE_YOUTUBE_QUERIES or [
     "kitchen remodel before and after",
     "bathroom remodel ideas",
-    "how to find a good contractor",
-    "home renovation tips",
-    "luxury kitchen remodel",
-    "high end bathroom finishes",
-    "whole house renovation",
-    "hiring a contractor tips",
 ]
 
 # Scheduler
 SCAN_INTERVAL_HOURS = 2
 
-# Email notifications (set all to enable)
-SMTP_HOST = None
-SMTP_PORT = 587
-SMTP_USER = None
-SMTP_PASS = None
-NOTIFY_EMAIL = None
+# Email notifications
+SMTP_HOST = os.environ.get("SMTP_HOST", None)
+SMTP_PORT = int(os.environ.get("SMTP_PORT", "587"))
+SMTP_USER = os.environ.get("SMTP_USER", None)
+SMTP_PASS = os.environ.get("SMTP_PASS", None)
+NOTIFY_EMAIL = os.environ.get("NOTIFY_EMAIL", None)
 
-# Webhook notifications (Slack/Discord)
-WEBHOOK_URL = None
+# Webhook
+WEBHOOK_URL = os.environ.get("WEBHOOK_URL", None)
 
-# White-label config
-COMPANY_NAME = "Social Prospector"
-COMPANY_LOGO_URL = None
-BRAND_COLOR = "#daa520"
+# White-label
+COMPANY_NAME = os.environ.get("COMPANY_NAME", "Social Prospector")
+COMPANY_LOGO_URL = os.environ.get("COMPANY_LOGO_URL", None)
+BRAND_COLOR = os.environ.get("BRAND_COLOR", "#daa520")
 
-# Reddit API credentials for reply posting (via PRAW)
-REDDIT_CLIENT_ID = None
-REDDIT_CLIENT_SECRET = None
-REDDIT_USERNAME = None
-REDDIT_PASSWORD = None
+# Reddit API (PRAW)
+REDDIT_CLIENT_ID = os.environ.get("REDDIT_CLIENT_ID", None)
+REDDIT_CLIENT_SECRET = os.environ.get("REDDIT_CLIENT_SECRET", None)
+REDDIT_USERNAME = os.environ.get("REDDIT_USERNAME", None)
+REDDIT_PASSWORD = os.environ.get("REDDIT_PASSWORD", None)

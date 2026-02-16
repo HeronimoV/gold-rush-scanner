@@ -12,26 +12,15 @@ try:
 except ImportError:
     BeautifulSoup = None
 
-from config import KEYWORDS, MIN_SCORE_THRESHOLD, USER_AGENT, REQUEST_DELAY
+from config import KEYWORDS, MIN_SCORE_THRESHOLD, USER_AGENT, REQUEST_DELAY, PROFILE_WEB_QUERIES
 from db import insert_lead
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("web_scanner")
 
 # Search queries for finding gold/silver buying discussions
-SEARCH_QUERIES = [
-    # Colorado-specific searches
-    '"looking for a contractor" Denver remodel',
-    '"need a remodeler" Colorado',
-    '"recommend a contractor" Denver',
-    '"kitchen remodel" Denver contractor',
-    '"bathroom remodel" Colorado Springs',
-    '"remodel" "Colorado" contractor recommendations',
-    '"contractor recommendations" Boulder remodel',
-    '"Fort Collins" remodel contractor',
-    '"high end finishes" Denver renovation',
-    '"luxury remodel" Colorado',
-    # General (will catch CO mentions)
+# Load search queries from active profile
+SEARCH_QUERIES = PROFILE_WEB_QUERIES or [
     '"looking for a contractor" remodel',
     '"need a remodeler" kitchen bathroom',
     '"how to find a good contractor" remodel',

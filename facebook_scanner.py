@@ -18,7 +18,7 @@ import time
 import requests
 from datetime import datetime, timezone
 
-from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY
+from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY, PROFILE_FB_GROUPS, PROFILE_WEB_QUERIES
 from db import insert_lead
 
 # Import location/scoring helpers
@@ -31,24 +31,8 @@ except ImportError:
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("facebook")
 
-# Colorado-specific Facebook groups to monitor
-# These are public groups — URLs for Apify scraper
-CO_FACEBOOK_GROUPS = [
-    # Denver home improvement / remodeling
-    "https://www.facebook.com/groups/denverHomeImprovement",
-    "https://www.facebook.com/groups/DenverContractors",
-    "https://www.facebook.com/groups/ColoradoHomeImprovement",
-    "https://www.facebook.com/groups/DenverRealEstate",
-    "https://www.facebook.com/groups/coloradospringsrealestate",
-    "https://www.facebook.com/groups/FortCollinsHomeImprovement",
-    "https://www.facebook.com/groups/BoulderHomeImprovement",
-    # Neighborhood / community groups (remodel posts appear here)
-    "https://www.facebook.com/groups/DenverNeighborhoods",
-    "https://www.facebook.com/groups/AuroraCO",
-    "https://www.facebook.com/groups/LakewoodCO",
-    "https://www.facebook.com/groups/HighlandsRanchCO",
-    "https://www.facebook.com/groups/CastleRockCO",
-]
+# Facebook groups from active profile
+CO_FACEBOOK_GROUPS = PROFILE_FB_GROUPS or []
 
 # Google search queries for Facebook group posts
 GOOGLE_FB_QUERIES = [

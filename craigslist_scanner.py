@@ -13,22 +13,30 @@ import requests
 from datetime import datetime, timezone
 from html import unescape
 
-from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY
+from config import KEYWORDS, MIN_SCORE_THRESHOLD, REQUEST_DELAY, PROFILE_CRAIGSLIST_REGIONS
 from db import insert_lead
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("craigslist")
 
-# Colorado Craigslist regions and their subdomains
-CO_REGIONS = {
-    "denver": "denver",
-    "cosprings": "cosprings",         # Colorado Springs
-    "boulder": "boulder",
-    "fortcollins": "fortcollins",
-    "pueblo": "pueblo",
-    "westslope": "westslope",         # Grand Junction / Western Slope
-    "highrockies": "highrockies",     # Summit / Eagle / etc.
+# All known Craigslist regions (used for lookup)
+ALL_REGIONS = {
+    "denver": "denver", "cosprings": "cosprings", "boulder": "boulder",
+    "fortcollins": "fortcollins", "pueblo": "pueblo",
+    "westslope": "westslope", "highrockies": "highrockies",
+    # Add more as needed for other states
+    "losangeles": "losangeles", "sfbay": "sfbay", "chicago": "chicago",
+    "newyork": "newyork", "seattle": "seattle", "austin": "austin",
+    "dallas": "dallas", "houston": "houston", "phoenix": "phoenix",
+    "atlanta": "atlanta", "miami": "miami", "boston": "boston",
+    "portland": "portland", "sandiego": "sandiego",
 }
+
+# Active regions from profile (or default Colorado)
+CO_REGIONS = {}
+_profile_regions = PROFILE_CRAIGSLIST_REGIONS or ["denver", "cosprings", "boulder", "fortcollins", "pueblo", "westslope", "highrockies"]
+for _r in _profile_regions:
+    CO_REGIONS[_r] = ALL_REGIONS.get(_r, _r)
 
 # Craigslist categories where remodeling leads appear
 # Format: (category_path, category_name)

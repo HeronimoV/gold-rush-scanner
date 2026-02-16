@@ -6,25 +6,15 @@ import time
 import requests
 from datetime import datetime, timezone
 
-from config import SUBREDDITS, USER_AGENT, REQUEST_DELAY
+from config import USER_AGENT, REQUEST_DELAY, PROFILE_COMPETITORS, PROFILE_COMPETITOR_SUBREDDITS, SUBREDDITS
 from db import insert_lead, get_connection
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 log = logging.getLogger("competitors")
 
-# Competitors to monitor
-COMPETITORS = [
-    "Home Depot",
-    "Lowes",
-    "Angi",
-    "Angie's List",
-    "HomeAdvisor",
-    "Thumbtack",
-    "Houzz",
-    "Bath Fitter",
-    "Re-Bath",
-    "Kitchen Magic",
-    "Home Advisor",
+# Load competitors from active profile
+COMPETITORS = PROFILE_COMPETITORS or [
+    "Home Depot", "Lowes", "Angi", "Thumbtack", "Houzz",
 ]
 
 # Complaint indicators — these signal someone is unhappy with their contractor/service
@@ -172,12 +162,8 @@ def run_competitor_scan():
     log.info("Starting competitor complaint scan...")
     log.info(f"Monitoring {len(COMPETITORS)} competitors across {len(SUBREDDITS)} subreddits")
 
-    # Only scan the most relevant subreddits for competitor mentions (not all)
-    try:
-        from config import LOCAL_SUBREDDITS
-        comp_subs = LOCAL_SUBREDDITS + ["HomeImprovement", "homeowners", "Renovations", "centuryhomes"]
-    except ImportError:
-        comp_subs = SUBREDDITS[:8]  # limit to first 8
+    # Use profile-specific competitor subreddits, or fall back
+    comp_subs = PROFILE_COMPETITOR_SUBREDDITS or SUBREDDITS[:8]
     
     log.info(f"Monitoring {len(COMPETITORS)} competitors across {len(comp_subs)} subreddits")
     total = 0
