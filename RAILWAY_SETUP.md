@@ -44,11 +44,30 @@ worker: python run_scheduled.py
 
 Make sure **both** are deployed as separate services.
 
-### 5. Restart Everything
+### 5. Clean the Database (CRITICAL)
+The existing database has dealer website spam from the web scanner. You need to clean it.
+
+**Option A: Via Railway CLI**
+```bash
+railway run python clean_db.py
+```
+
+**Option B: SSH into Railway**
+1. Click on the **web** service
+2. Click **Settings** → **Data** → **Database**
+3. Find the database, click **Connect**
+4. Run: `python clean_db.py`
+
+**Option C: Delete the database entirely**
+1. In Railway dashboard → **Volumes** or **Data**
+2. Delete `leads.db`
+3. Redeploy — fresh database will be created on next scan
+
+### 6. Restart Everything
 1. Click on **web** service → **Redeploy**
 2. Click on **worker** service → **Deploy** (or **Redeploy**)
 
-### 6. Check Logs
+### 7. Check Logs
 - **Web logs:** Should show Flask starting, dashboard running
 - **Worker logs:** Should show "Starting full scan", "Scanning r/Gold...", etc.
 
