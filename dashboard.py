@@ -530,6 +530,7 @@ def draft_reply():
     username = data.get("username", "")
     subreddit = data.get("subreddit", "")
     score = data.get("score", 5)
+    reply_type = data.get("type", "dm")  # 'dm' or 'comment'
 
     # Get the lead content from DB
     from db import get_connection
@@ -538,7 +539,20 @@ def draft_reply():
     conn.close()
     content = row["content"] if row else ""
 
-    reply = generate_reply(username, content, subreddit, score)
+    # Use new outreach module
+    from outreach import generate_dm, generate_comment_reply
+    lead_data = {
+        'username': username,
+        'content': content,
+        'intent_score': score,
+        'subreddit': subreddit
+    }
+    
+    if reply_type == "comment":
+        reply = generate_comment_reply(lead_data)
+    else:
+        reply = generate_dm(lead_data)
+    
     return jsonify({"reply": reply})
 
 
